@@ -26,4 +26,6 @@ Pasos:
 8. **Tests**: en `apps/<app>/tests/` cubrir el service (prioritario) y la vista (status + partial
    correcto). Mockear efectos del SO. Ver `.rules/testing.md`.
 9. **Verificar**: `uv run pytest -x -v` y probar en el navegador (`tailwind runserver`).
-10. **Commit**: `feat: <descripción en español>`.
+10. **Revisar**: pasar `/code-review` o el subagente `code-reviewer` sobre el diff (revisión en el
+    límite de la feature).
+11. **Commit**: `feat: <descripción en español>` (en `main`; este proyecto no usa ramas por feature).
