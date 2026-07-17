@@ -1,0 +1,22 @@
+<div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+    onclick="if (event.target === this) this.remove()"
+>
+    <div class="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg border border-slate-800 bg-slate-900 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 px-5 py-3">
+            <h2 class="font-semibold text-slate-100">{{ project.name }} · README</h2>
+            <button
+                onclick="this.closest('.fixed').remove()"
+                class="rounded p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
+                aria-label="Cerrar"
+            >✕</button>
+        </div>
+        <div class="overflow-y-auto px-6 py-5">
+            {% if content %}
+                <div class="prose prose-invert prose-sm max-w-none">{{ content|safe }}</div>
+            {% else %}
+                <p class="text-slate-400">Este proyecto no tiene README.md.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

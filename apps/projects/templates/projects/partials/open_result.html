@@ -1,0 +1,7 @@
+<button
+    class="flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition
+    {% if ok %}bg-emerald-700 text-emerald-100{% else %}bg-rose-700 text-rose-100{% endif %}"
+    disabled
+>
+    {% if ok %}Abriendo…{% else %}Error al abrir{% endif %}
+</button>

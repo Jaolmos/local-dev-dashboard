@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for project in projects %}
+        {% include "projects/partials/project_card.html" %}
+    {% empty %}
+        <div class="col-span-full rounded-lg border border-dashed border-slate-700 p-10 text-center">
+            <p class="text-slate-400">No hay proyectos en el catálogo.</p>
+            <p class="mt-2 text-sm text-slate-500">
+                Ejecuta <code class="rounded bg-slate-800 px-1.5 py-0.5 text-emerald-400">python manage.py sync_projects</code>
+                para escanear tu carpeta de proyectos.
+            </p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
