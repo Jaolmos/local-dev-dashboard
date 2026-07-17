@@ -20,11 +20,11 @@ Pasos:
    service, renderiza. Los endpoints HTMX devuelven un **partial**, no la página completa.
 5. **URL**: añadir la ruta en `apps/<app>/urls.py` (namespace `app_name`).
 6. **Template / partial**: crear el partial en `apps/<app>/templates/<app>/partials/` y cablearlo
-   con atributos `hx-*` (ver `.rules/frontend.md` para los patrones: `revealed`, modal, `outerHTML`).
+   con atributos `hx-*` (ver `.claude/.rules/frontend.md` para los patrones: `revealed`, modal, `outerHTML`).
    Estilar con Tailwind.
 7. **Tailwind**: si añades clases nuevas, `uv run python manage.py tailwind build` (o `watch`).
 8. **Tests**: en `apps/<app>/tests/` cubrir el service (prioritario) y la vista (status + partial
-   correcto). Mockear efectos del SO. Ver `.rules/testing.md`.
+   correcto). Mockear efectos del SO. Ver `.claude/.rules/testing.md`.
 9. **Verificar**: `uv run pytest -x -v` y probar en el navegador (`tailwind runserver`).
 10. **Revisar**: pasar `/code-review` o el subagente `code-reviewer` sobre el diff (revisión en el
     límite de la feature).

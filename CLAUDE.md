@@ -27,12 +27,12 @@ producción**: prioriza simplicidad y DX sobre hardening.
 - **Arquitectura por capas:** `models` → `services` → `views` → `templates`/`partials` → `tests`.
   La lógica de negocio (git, discovery, stack, readme) vive en `apps/<app>/services/`, no en las vistas.
 
-Detalle por área en `.rules/`:
-- @.rules/architecture.md
-- @.rules/python-django.md
-- @.rules/frontend.md
-- @.rules/testing.md
-- @.rules/git-conventions.md
+Detalle por área en `.claude/.rules/`:
+- @.claude/.rules/architecture.md
+- @.claude/.rules/python-django.md
+- @.claude/.rules/frontend.md
+- @.claude/.rules/testing.md
+- @.claude/.rules/git-conventions.md
 
 ## Comandos habituales
 

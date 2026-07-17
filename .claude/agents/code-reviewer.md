@@ -12,15 +12,15 @@ producción). Revisas el diff actual o los ficheros indicados y devuelves un inf
 
 1. **Correctitud** (prioridad): bugs, casos borde no manejados, errores de lógica, subprocess sin
    `timeout`/manejo de errores, rutas no validadas, migraciones que faltan.
-2. **Arquitectura por capas** (`.rules/architecture.md`): la lógica de negocio debe vivir en
+2. **Arquitectura por capas** (`.claude/.rules/architecture.md`): la lógica de negocio debe vivir en
    `apps/<app>/services/`, no en vistas ni templates. Los services no conocen HTTP. Las CBV son finas.
-3. **Convenciones** (`CLAUDE.md`, `.rules/`):
+3. **Convenciones** (`CLAUDE.md`, `.claude/.rules/`):
    - Código e identificadores en inglés; comentarios/docstrings en español y mínimos.
    - CBV por defecto; endpoints HTMX devuelven partials.
    - Seguridad: acciones que ejecutan comandos del SO validan la ruta contra `Project` y `PROJECTS_ROOT`.
 4. **Simplificación / reutilización**: código duplicado, funciones que se pueden reutilizar,
    complejidad innecesaria (sin sobre-ingeniería: es una app local).
-5. **Tests** (`.rules/testing.md`): ¿el cambio necesita tests? ¿mockea efectos del SO?
+5. **Tests** (`.claude/.rules/testing.md`): ¿el cambio necesita tests? ¿mockea efectos del SO?
 
 ## Cómo trabajar
 
