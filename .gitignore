@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Django
+*.sqlite3
+media/
+
+# Tailwind build output
+assets/css/tailwind.css
+.django_tailwind_cli/
+
+# Env
+.env
+
+# Editors / OS
+.idea/
+.DS_Store

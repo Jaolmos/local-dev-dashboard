@@ -1,0 +1,28 @@
+[project]
+name = "local-dev-dashboard"
+version = "0.1.0"
+description = "Panel de control local para tus proyectos de código en Linux"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.0,<6.1",
+    "django-htmx>=1.28",
+    "django-template-partials>=25.3",
+    "django-tailwind-cli>=4.6",
+    "django-environ>=0.14",
+    "markdown>=3.10",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.12",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["apps"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
