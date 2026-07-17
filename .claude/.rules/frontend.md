@@ -16,6 +16,7 @@ Plantillas Django + HTMX + partials. Cero JavaScript propio salvo que sea impres
 
 - Fragmentos reutilizables en `partials/`. Usar `django-template-partials` (`{% partialdef %}`)
   cuando el fragmento vive junto a su template; ficheros sueltos cuando se reutilizan.
+- **Nombrado:** los partials NO llevan prefijo `_`; la carpeta `partials/` ya indica que lo son.
 
 ## Tailwind
 
@@ -28,4 +29,5 @@ Plantillas Django + HTMX + partials. Cero JavaScript propio salvo que sea impres
 ## Objetivo de diseño
 
 La UI debe ser **atractiva y profesional** (no el maquetado básico). Para trabajo de diseño
-serio, usar la skill `frontend-design`. El `<head>` va en un partial aparte (`_head.html`).
+serio, usar la skill `frontend-design`. El `<head>` se queda en `base.html`; el `<header>`
+visible (barra superior) va en un partial aparte (`partials/header.html`).
