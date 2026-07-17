@@ -1,0 +1,31 @@
+{% load tailwind_cli %}
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Local Dev Dashboard{% endblock %}</title>
+    {% tailwind_css %}
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body class="h-full bg-slate-950 text-slate-100 antialiased">
+    <div class="mx-auto max-w-6xl px-4 py-8">
+        <header class="mb-8 flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-50">
+                    <span class="text-emerald-400">~/</span>Local Dev Dashboard
+                </h1>
+                <p class="mt-1 text-sm text-slate-400">
+                    Centro de mando de tus proyectos locales
+                </p>
+            </div>
+        </header>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <div id="modal-root"></div>
+</body>
+</html>
