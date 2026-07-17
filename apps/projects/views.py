@@ -6,8 +6,8 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import ListView
-from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.base import View
+from django.views.generic.detail import SingleObjectMixin
 
 from .models import Project
 from .services import git, readme
