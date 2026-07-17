@@ -18,3 +18,11 @@ assets/css/tailwind.css
 # Editors / OS
 .idea/
 .DS_Store
+
+# Claude Code (config y memoria personal; se comparten agents/ y skills/)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Ficheros privados
+*.private
+.private/
