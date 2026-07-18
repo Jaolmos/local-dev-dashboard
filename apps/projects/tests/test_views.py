@@ -1,5 +1,7 @@
 """Tests de las vistas: status, partial correcto y acción de VSCode mockeada."""
 
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from django.urls import reverse
 
@@ -27,6 +29,21 @@ def test_list_returns_200_and_template(client, project):
     assert response.status_code == 200
     assert "projects/project_list.html" in _template_names(response)
     assert b"demo" in response.content
+
+
+def test_list_orders_by_recent_activity_first(client, settings, tmp_path):
+    settings.PROJECTS_ROOT = tmp_path
+    now = datetime.now(UTC)
+    Project.objects.create(
+        name="old", path=str(tmp_path / "old"), last_commit=now - timedelta(days=30)
+    )
+    Project.objects.create(name="recent", path=str(tmp_path / "recent"), last_commit=now)
+    Project.objects.create(name="never", path=str(tmp_path / "never"), last_commit=None)
+
+    names = [p.name for p in client.get(reverse("projects:list")).context["projects"]]
+
+    # Lo más reciente arriba y los repos sin commits al final.
+    assert names == ["recent", "old", "never"]
 
 
 def test_git_status_returns_partial(client, project):

@@ -40,6 +40,7 @@ class Command(BaseCommand):
                     "name": item.name,
                     "description": item.description,
                     "stack_tags": item.stack_tags,
+                    "last_commit": item.last_commit,
                 },
             )
             created += was_created

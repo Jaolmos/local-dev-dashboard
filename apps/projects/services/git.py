@@ -2,6 +2,7 @@
 
 import subprocess
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 _TIMEOUT = 5
@@ -51,3 +52,22 @@ def get_status(path: Path) -> GitStatus:
         behind=behind,
         has_upstream=has_upstream,
     )
+
+
+def get_last_commit(path: Path) -> datetime | None:
+    """Fecha del último commit, o None si no es repo, no tiene commits o git falla.
+
+    Nunca propaga errores: se llama para cada repo durante el escaneo y un repo
+    problemático (lento, corrupto) no debe abortar la sincronización completa.
+    """
+    if not (path / ".git").exists():
+        return None
+
+    try:
+        result = _run(path, "log", "-1", "--format=%cI")
+        if result.returncode != 0 or not result.stdout.strip():
+            return None
+        # %cI da ISO 8601 con offset -> datetime con zona (el proyecto usa USE_TZ).
+        return datetime.fromisoformat(result.stdout.strip())
+    except (subprocess.SubprocessError, OSError, ValueError):
+        return None
