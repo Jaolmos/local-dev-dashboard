@@ -1,9 +1,10 @@
 """Radar de proyectos: escanea la carpeta raíz y detecta repositorios."""
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
-from . import stack
+from . import git, stack
 
 # Niveles de subcarpetas a explorar bajo la raíz (los repos suelen estar agrupados).
 _MAX_DEPTH = 3
@@ -15,6 +16,7 @@ class DiscoveredProject:
     path: Path
     description: str = ""
     stack_tags: list[str] = field(default_factory=list)
+    last_commit: datetime | None = None
 
 
 def _read_description(project_path: Path) -> str:
@@ -61,6 +63,7 @@ def _walk(directory: Path, depth_left: int, out: list[DiscoveredProject]) -> Non
                     path=entry,
                     description=_read_description(entry),
                     stack_tags=stack.detect(entry),
+                    last_commit=git.get_last_commit(entry),
                 )
             )
             continue  # no se baja dentro de un repositorio ya detectado

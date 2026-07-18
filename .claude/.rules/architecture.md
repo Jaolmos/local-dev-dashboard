@@ -29,7 +29,15 @@ apps/<app>/
 - Las apps de dominio viven en **`apps/`** y se declaran como `apps.<nombre>` en `INSTALLED_APPS`
   (con `label` corto en su `AppConfig`).
 
-## Datos que NO se persisten
+## Qué se persiste y qué no
 
-Estado de Git y HTML del README se calculan al vuelo. En la BD solo se guarda el catálogo:
-`name`, `path`, `description`, `stack_tags`, timestamps.
+En la BD solo vive el **catálogo**, que es lo que permite pintar la lista al instante:
+`name`, `path`, `description`, `stack_tags`, `last_commit`, timestamps.
+
+El **estado vivo de Git** (rama, cambios sin confirmar, ahead/behind) y el **HTML del README**
+se calculan al vuelo bajo demanda vía HTMX y **no** se guardan.
+
+`last_commit` es la excepción deliberada: se toma en cada `sync_projects` como instantánea,
+no en vivo. Se persiste porque el orden por actividad lo hace la BD y no se puede ordenar por
+un dato que se calcula al renderizar. Como contrapartida, la fecha mostrada envejece hasta la
+siguiente sincronización.

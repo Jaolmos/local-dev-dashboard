@@ -53,3 +53,41 @@ def test_status_repo_without_upstream(repo):
     assert status.has_upstream is False
     assert status.ahead == 0
     assert status.behind == 0
+
+
+def test_last_commit_returns_aware_datetime(repo):
+    last = git.get_last_commit(repo)
+
+    assert last is not None
+    # Debe traer zona horaria: el proyecto usa USE_TZ.
+    assert last.tzinfo is not None
+
+
+def test_last_commit_none_without_git(tmp_path):
+    assert git.get_last_commit(tmp_path) is None
+
+
+def test_last_commit_none_when_repo_has_no_commits(tmp_path):
+    # Repo recién iniciado: `git log` falla porque no hay HEAD.
+    _git(tmp_path, "init", "-b", "main")
+
+    assert git.get_last_commit(tmp_path) is None
+
+
+def test_last_commit_none_when_git_times_out(repo, monkeypatch):
+    # Un repo lento no debe abortar la sincronización completa.
+    def _timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd="git", timeout=5)
+
+    monkeypatch.setattr("apps.projects.services.git.subprocess.run", _timeout)
+
+    assert git.get_last_commit(repo) is None
+
+
+def test_last_commit_none_when_output_is_not_a_date(repo, monkeypatch):
+    monkeypatch.setattr(
+        "apps.projects.services.git._run",
+        lambda *a, **k: subprocess.CompletedProcess(args=[], returncode=0, stdout="basura"),
+    )
+
+    assert git.get_last_commit(repo) is None

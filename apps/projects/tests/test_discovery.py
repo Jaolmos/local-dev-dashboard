@@ -86,3 +86,12 @@ def test_description_empty_without_readme(tmp_path):
     [project] = discovery.scan_projects(tmp_path)
 
     assert project.description == ""
+
+
+def test_scan_reports_no_last_commit_for_fake_repo(tmp_path):
+    # El .git simulado no es un repo real, así que no hay fecha de commit.
+    _make_repo(tmp_path / "proj")
+
+    [project] = discovery.scan_projects(tmp_path)
+
+    assert project.last_commit is None

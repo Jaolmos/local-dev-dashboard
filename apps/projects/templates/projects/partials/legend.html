@@ -1,0 +1,22 @@
+{# Clave de los indicadores de git; va sobre la rejilla para verla sin hacer scroll. #}
+<div class="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-500">
+    <span class="inline-flex items-center gap-1.5">
+        {% include "projects/partials/status_badge.html" with tone="brand" label="sin cambios" %}
+        todo commiteado
+    </span>
+
+    <span class="inline-flex items-center gap-1.5">
+        {% include "projects/partials/status_badge.html" with tone="amber" label="con cambios" %}
+        tienes trabajo sin commitear
+    </span>
+
+    <span class="inline-flex items-center gap-1.5">
+        <span class="font-mono font-medium text-sky-400">↑</span>
+        commits sin subir al remoto
+    </span>
+
+    <span class="inline-flex items-center gap-1.5">
+        <span class="font-mono font-medium text-rose-400">↓</span>
+        commits sin bajar del remoto
+    </span>
+</div>
