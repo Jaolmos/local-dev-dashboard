@@ -1,0 +1,126 @@
+# Arquitectura
+
+Cómo está montada la app y por qué. No es referencia normativa (las reglas obligatorias
+viven en `.claude/.rules/`); esto es la explicación con contexto y ejemplos concretos.
+
+## La idea central
+
+Hay **dos velocidades** de datos, y toda la arquitectura gira en torno a esa distinción:
+
+1. **Catálogo (SQLite, rápido)**: lo que hace falta para pintar la lista al instante.
+   Nombre, ruta, descripción, stack, fecha del último commit. Se llena con
+   `sync_projects` y no cambia hasta la siguiente sincronización.
+2. **Estado vivo (bajo demanda, más lento)**: lo que puede cambiar en cualquier momento
+   mientras trabajas — rama actual, si hay cambios sin commitear, ahead/behind del
+   remoto. Se calcula **en cada petición**, vía HTMX, y **nunca se guarda**.
+
+Si algo tarda (ejecutar `git`, leer y parsear un README completo), no bloquea la carga
+inicial de la página: se pide aparte cuando la tarjeta ya está en pantalla.
+
+## Las capas, de abajo arriba
+
+```
+apps/projects/
+├── models.py            # Project: lo que vive en SQLite
+├── services/             # lógica pura, sin saber nada de HTTP
+│   ├── discovery.py       # escanea PROJECTS_ROOT, encuentra repos
+│   ├── git.py              # ejecuta `git` y parsea la salida
+│   ├── stack.py             # detecta tecnologías por ficheros marcadores
+│   └── readme.py             # Markdown -> HTML
+├── management/commands/
+│   └── sync_projects.py    # orquesta discovery + ORM (el único que escribe en BD)
+├── views.py              # CBV finas: leen Project, llaman a un service, renderizan
+├── urls.py               # 4 rutas
+└── templates/projects/
+    ├── project_list.html          # página completa (extiende base.html)
+    └── partials/                    # fragmentos que devuelven las vistas HTMX
+```
+
+**Regla de oro de este proyecto:** los `services/` no saben qué es una request ni una
+response. Reciben `Path` o `str`, devuelven dataclasses o listas. Eso es lo que permite
+testearlos sin levantar Django ni el cliente HTTP — se ve en `tests/test_git.py`,
+que llama a `git.get_status(tmp_path)` directamente.
+
+Las vistas (`views.py`) son deliberadamente finas. Mira `GitStatusView`:
+
+```python
+class GitStatusView(SingleObjectMixin, View):
+    model = Project
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        project = self.get_object()
+        status = git.get_status(project.location)          # 1. llama al service
+        return render(request, "projects/partials/git_status.html",  # 2. renderiza
+                      {"project": project, "git": status})
+```
+
+Tres líneas: obtener el objeto, llamar al service, renderizar el partial. Ese patrón se
+repite en `ReadmeView` y `OpenVSCodeView`. Si algún día una vista crece más que esto,
+es señal de que se está colando lógica que debería vivir en `services/`.
+
+## El escaneo (`discovery.py`) — cómo se encuentran los repos
+
+`sync_projects` no sabe de antemano qué carpetas son proyectos. Recorre `PROJECTS_ROOT`
+recursivamente hasta 3 niveles de profundidad (`_MAX_DEPTH`), y en cada carpeta:
+
+1. Si es oculta (empieza por `.`) o no es un directorio, se ignora.
+2. Si tiene `.git`, **es un proyecto**: se registra y **no se sigue bajando dentro**
+   (`continue` tras el `append`, `discovery.py:69`). Así un repo no reporta como
+   proyectos aparte las carpetas que tiene dentro.
+3. Si no tiene `.git` y aún queda profundidad, se sigue bajando — esto es lo que permite
+   que `~/Proyectos/reto_apps_2026/` (carpeta contenedora, sin `.git` propio) deje ver
+   los repos que tiene dentro, como este mismo dashboard.
+
+Por cada repo encontrado se calculan a la vez `stack.detect()` (mira ficheros
+marcadores: `manage.py` → Django, `package.json` → Node.js, etc.) y
+`git.get_last_commit()` (para poder ordenar por actividad más tarde). Ambos se guardan
+ya en el `DiscoveredProject`, listos para que `sync_projects` los escriba en el catálogo.
+
+`_MAX_DEPTH = 3` es una constante fija, no configurable desde `.env` — si algún día una
+estructura de carpetas más profunda queda fuera del escaneo, ese es el primer sitio
+donde tocar.
+
+## El comando `sync_projects` — el único que escribe
+
+Es el puente entre `discovery` (que solo lee disco) y el catálogo (SQLite). Por cada
+`DiscoveredProject` encontrado hace un `update_or_create` usando `path` como clave
+única — así relanzar el comando no duplica proyectos, solo actualiza sus datos.
+
+Con `--prune` además borra del catálogo los que ya no aparecieron en el escaneo (se
+movieron o se borraron del disco). Sin `--prune`, un proyecto borrado se queda "fantasma"
+en el panel hasta que se pase esa opción.
+
+`last_synced` (`auto_now=True` en el modelo) se actualiza solo en cada
+`update_or_create`, aunque hoy no se muestra en ningún sitio de la UI — quedó como dato
+disponible por si hiciera falta mostrar "sincronizado hace X".
+
+## Seguridad (aun siendo una app local)
+
+La única acción que ejecuta algo del sistema operativo es "Abrir en VSCode"
+(`OpenVSCodeView._open`, `views.py:68-79`). Antes de lanzar el proceso comprueba que la
+ruta resuelta vive **dentro de `PROJECTS_ROOT`**:
+
+```python
+try:
+    path.resolve().relative_to(settings.PROJECTS_ROOT.resolve())
+except ValueError:
+    return False
+```
+
+Esto importa porque `path` viene de `project.location`, que a su vez viene de un campo
+de BD (`Project.path`) — en teoría inyectable si alguna vez se expusiera una vía para
+crear/editar proyectos desde fuera de `sync_projects`. Hoy no existe esa vía (solo el
+comando escribe en el catálogo), pero la comprobación queda como cinturón de seguridad
+barato. Si se añadiera algún día una segunda acción del SO (abrir terminal, abrir
+explorador…), debería repetir esta misma validación.
+
+## Qué NO hace la app (por diseño)
+
+- No vigila los repos en tiempo real (sin watcher de filesystem); el catálogo envejece
+  hasta el siguiente `sync_projects`.
+- No escribe en los repos: todo el uso de `git` es de solo lectura (`status`,
+  `rev-parse`, `rev-list`, `log`) — ver `services/git.py`.
+- No tiene autenticación ni pretende exponerse fuera de `127.0.0.1`.
+
+Ver también: [flujos HTMX](flujos-htmx.md) para el detalle petición a petición, y
+[modelo de datos](modelo-datos.md) para qué guarda cada campo de `Project` y por qué.

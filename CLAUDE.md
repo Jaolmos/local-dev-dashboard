@@ -35,6 +35,14 @@ Detalle por área en `.claude/.rules/`:
 - @.claude/.rules/testing.md
 - @.claude/.rules/git-conventions.md
 
+## Documentación de la app
+
+Cómo funciona por dentro (las reglas de arriba dicen *cómo escribir*; esto explica *qué
+hay ya construido y por qué*):
+- @docs/arquitectura.md
+- @docs/flujos-htmx.md
+- @docs/modelo-datos.md
+
 ## Comandos habituales
 
 ```bash
