@@ -1,0 +1,22 @@
+{# Cabecera del dashboard: identidad, subtítulo y recuento de proyectos. #}
+<header class="mb-10 animate-fade">
+    <div class="flex flex-wrap items-end justify-between gap-4 border-b border-ink-800 pb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                <span class="font-mono text-brand-400">~/</span>Local Dev Dashboard
+            </h1>
+            <p class="mt-2 text-sm text-ink-500">
+                Centro de mando de tus proyectos locales
+            </p>
+        </div>
+
+        {% if projects %}
+        <div class="flex items-baseline gap-2 rounded-full border border-ink-800 bg-ink-900/60 px-4 py-1.5">
+            <span class="font-mono text-lg font-semibold text-brand-400">{{ projects|length }}</span>
+            <span class="text-xs font-medium tracking-wide text-ink-500 uppercase">
+                {% if projects|length == 1 %}proyecto{% else %}proyectos{% endif %}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</header>

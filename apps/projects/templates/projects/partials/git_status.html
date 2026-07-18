@@ -1,18 +1,30 @@
 {% if git.is_repo %}
-<div class="flex items-center gap-1.5 text-xs">
-    <span class="font-mono text-slate-300">{{ git.branch }}</span>
+<div class="flex animate-fade items-center gap-1.5 text-xs">
+    <span class="font-mono text-ink-500">{{ git.branch }}</span>
+
     {% if git.is_dirty %}
-        <span class="rounded bg-amber-500/20 px-1.5 py-0.5 font-medium text-amber-300" title="Cambios sin confirmar">dirty</span>
+        <span
+            class="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 font-medium text-amber-300 ring-1 ring-inset ring-amber-500/20"
+            title="Cambios sin confirmar"
+        >
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>dirty
+        </span>
     {% else %}
-        <span class="rounded bg-emerald-500/20 px-1.5 py-0.5 font-medium text-emerald-300" title="Sin cambios">clean</span>
+        <span
+            class="inline-flex items-center gap-1 rounded-full bg-brand-500/10 px-2 py-0.5 font-medium text-brand-400 ring-1 ring-inset ring-brand-500/20"
+            title="Sin cambios"
+        >
+            <span class="h-1.5 w-1.5 rounded-full bg-brand-400"></span>clean
+        </span>
     {% endif %}
+
     {% if git.ahead %}
-        <span class="text-sky-400" title="Commits por subir">↑{{ git.ahead }}</span>
+        <span class="font-mono font-medium text-sky-400" title="Commits por subir">↑{{ git.ahead }}</span>
     {% endif %}
     {% if git.behind %}
-        <span class="text-rose-400" title="Commits por bajar">↓{{ git.behind }}</span>
+        <span class="font-mono font-medium text-rose-400" title="Commits por bajar">↓{{ git.behind }}</span>
     {% endif %}
 </div>
 {% else %}
-<span class="text-xs text-slate-600">sin git</span>
+<span class="animate-fade text-xs text-ink-700">sin git</span>
 {% endif %}

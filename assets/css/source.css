@@ -2,3 +2,179 @@
 
 @source "../../templates/**/*.html";
 @source "../../apps/**/templates/**/*.html";
+
+/* Sistema de diseño: tipografía, superficies en capas y acentos. */
+@theme {
+    --font-sans:
+        "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+    /* Superficies en capas: fondo -> tarjeta -> elevada. */
+    --color-ink-950: oklch(0.16 0.015 265);
+    --color-ink-900: oklch(0.2 0.017 265);
+    --color-ink-800: oklch(0.25 0.019 265);
+    --color-ink-700: oklch(0.32 0.021 265);
+    --color-ink-500: oklch(0.55 0.02 265);
+    --color-ink-300: oklch(0.75 0.015 265);
+    --color-ink-100: oklch(0.94 0.008 265);
+
+    /* Acentos. */
+    --color-brand-400: oklch(0.8 0.16 165);
+    --color-brand-500: oklch(0.72 0.17 165);
+    --color-brand-600: oklch(0.62 0.16 165);
+}
+
+/* Animaciones de entrada (CSS puro, sin JS). */
+@keyframes rise-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes pop-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@utility animate-rise {
+    animation: rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@utility animate-fade {
+    animation: fade-in 0.25s ease-out backwards;
+}
+
+@utility animate-pop {
+    animation: pop-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* Markdown del README renderizado (el plugin typography no viene con el binario). */
+.readme-body {
+    color: var(--color-ink-300);
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+.readme-body > * + * {
+    margin-top: 1em;
+}
+.readme-body h1,
+.readme-body h2,
+.readme-body h3,
+.readme-body h4 {
+    color: var(--color-ink-100);
+    font-weight: 700;
+    line-height: 1.3;
+    margin-top: 1.6em;
+}
+.readme-body h1 {
+    font-size: 1.5rem;
+}
+.readme-body h2 {
+    font-size: 1.25rem;
+    border-bottom: 1px solid var(--color-ink-800);
+    padding-bottom: 0.3em;
+}
+.readme-body h3 {
+    font-size: 1.05rem;
+}
+.readme-body a {
+    color: var(--color-brand-400);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.readme-body strong {
+    color: var(--color-ink-100);
+    font-weight: 600;
+}
+.readme-body ul,
+.readme-body ol {
+    padding-left: 1.4em;
+}
+.readme-body ul {
+    list-style: disc;
+}
+.readme-body ol {
+    list-style: decimal;
+}
+.readme-body li + li {
+    margin-top: 0.35em;
+}
+.readme-body code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--color-ink-800);
+    color: var(--color-brand-400);
+    padding: 0.15em 0.4em;
+    border-radius: 0.35rem;
+}
+.readme-body pre {
+    background: var(--color-ink-950);
+    border: 1px solid var(--color-ink-800);
+    border-radius: 0.75rem;
+    padding: 1em;
+    overflow-x: auto;
+}
+.readme-body pre code {
+    background: none;
+    color: var(--color-ink-300);
+    padding: 0;
+}
+.readme-body blockquote {
+    border-left: 3px solid var(--color-ink-700);
+    padding-left: 1em;
+    color: var(--color-ink-500);
+}
+.readme-body table {
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+.readme-body th,
+.readme-body td {
+    border: 1px solid var(--color-ink-800);
+    padding: 0.5em 0.75em;
+    text-align: left;
+}
+.readme-body th {
+    color: var(--color-ink-100);
+    background: var(--color-ink-800);
+}
+.readme-body img {
+    max-width: 100%;
+    height: auto;
+}
+.readme-body hr {
+    border-color: var(--color-ink-800);
+}
+
+/* Respeta a quien prefiere menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

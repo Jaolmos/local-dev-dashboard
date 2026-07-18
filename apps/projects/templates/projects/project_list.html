@@ -1,15 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
     {% for project in projects %}
         {% include "projects/partials/project_card.html" %}
     {% empty %}
-        <div class="col-span-full rounded-lg border border-dashed border-slate-700 p-10 text-center">
-            <p class="text-slate-400">No hay proyectos en el catálogo.</p>
-            <p class="mt-2 text-sm text-slate-500">
-                Ejecuta <code class="rounded bg-slate-800 px-1.5 py-0.5 text-emerald-400">python manage.py sync_projects</code>
-                para escanear tu carpeta de proyectos.
+        <div class="col-span-full animate-fade rounded-2xl border border-dashed border-ink-700 bg-ink-900/40 p-14 text-center">
+            <p class="text-lg font-semibold text-ink-100">Aún no hay proyectos en el catálogo</p>
+            <p class="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-500">
+                Ejecuta
+                <code class="rounded-md bg-ink-800 px-2 py-1 font-mono text-xs text-brand-400">manage.py sync_projects</code>
+                para escanear tu carpeta de proyectos y llenar el panel.
             </p>
         </div>
     {% endfor %}

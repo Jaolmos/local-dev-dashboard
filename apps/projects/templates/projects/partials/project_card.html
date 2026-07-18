@@ -1,33 +1,42 @@
-<article class="flex flex-col rounded-lg border border-slate-800 bg-slate-900 p-5 transition hover:border-slate-700">
-    <div class="flex items-start justify-between gap-2">
-        <h2 class="font-semibold text-slate-100">{{ project.name }}</h2>
+{% load project_tags %}
+{# Retardo escalonado: cada tarjeta entra un pelín después de la anterior. #}
+<article
+    class="group animate-rise flex flex-col rounded-2xl border border-ink-800 bg-ink-900/70 p-5 shadow-lg shadow-black/20 transition duration-200 hover:-translate-y-1 hover:border-brand-500/40 hover:shadow-xl hover:shadow-brand-500/5"
+    style="animation-delay: {{ forloop.counter0 }}0ms"
+>
+    <div class="flex items-start justify-between gap-3">
+        <h2 class="font-semibold text-ink-100 transition-colors group-hover:text-white">
+            {{ project.name }}
+        </h2>
         <div
             hx-get="{% url 'projects:git-status' project.pk %}"
             hx-trigger="revealed"
             hx-swap="innerHTML"
-            class="text-xs text-slate-500"
+            class="shrink-0"
         >
-            <span class="inline-block h-2 w-2 animate-pulse rounded-full bg-slate-600"></span>
+            <span class="inline-block h-2 w-2 animate-pulse rounded-full bg-ink-700"></span>
         </div>
     </div>
 
-    <p class="mt-2 line-clamp-2 text-sm text-slate-400">
+    <p class="mt-2.5 line-clamp-2 text-sm leading-relaxed {% if project.description %}text-ink-500{% else %}text-ink-700 italic{% endif %}">
         {{ project.description|default:"Sin descripción" }}
     </p>
 
     {% if project.stack_tags %}
-    <div class="mt-3 flex flex-wrap gap-1.5">
+    <div class="mt-4 flex flex-wrap gap-1.5">
         {% for tag in project.stack_tags %}
-        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-xs font-medium text-emerald-300">{{ tag }}</span>
+        <span class="rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ tag|stack_color }}">
+            {{ tag }}
+        </span>
         {% endfor %}
     </div>
     {% endif %}
 
-    <div class="mt-auto flex gap-2 pt-4">
+    <div class="mt-auto flex gap-2 pt-5">
         <button
             hx-post="{% url 'projects:open-vscode' project.pk %}"
             hx-swap="outerHTML"
-            class="flex-1 rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-500"
+            class="flex-1 cursor-pointer rounded-lg bg-brand-600 px-3 py-2 text-sm font-semibold text-ink-950 transition hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 focus-visible:outline-none"
         >
             Abrir en VSCode
         </button>
@@ -35,7 +44,7 @@
             hx-get="{% url 'projects:readme' project.pk %}"
             hx-target="#modal-root"
             hx-swap="innerHTML"
-            class="rounded-md border border-slate-700 px-3 py-1.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+            class="cursor-pointer rounded-lg border border-ink-700 px-3 py-2 text-sm font-medium text-ink-300 transition hover:border-ink-500 hover:bg-ink-800 hover:text-ink-100 focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 focus-visible:outline-none"
         >
             Docs
         </button>

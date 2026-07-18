@@ -1,21 +1,25 @@
 <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+    class="fixed inset-0 z-50 flex animate-fade items-center justify-center bg-ink-950/80 p-4 backdrop-blur-sm"
     onclick="if (event.target === this) this.remove()"
 >
-    <div class="flex max-h-[85vh] w-full max-w-3xl flex-col rounded-lg border border-slate-800 bg-slate-900 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-slate-800 px-5 py-3">
-            <h2 class="font-semibold text-slate-100">{{ project.name }} · README</h2>
+    <div class="flex max-h-[85vh] w-full max-w-3xl animate-pop flex-col overflow-hidden rounded-2xl border border-ink-700 bg-ink-900 shadow-2xl shadow-black/50">
+        <div class="flex shrink-0 items-center justify-between gap-4 border-b border-ink-800 px-6 py-4">
+            <h2 class="truncate font-semibold text-ink-100">
+                {{ project.name }}
+                <span class="ml-1 font-mono text-xs font-normal text-ink-500">README.md</span>
+            </h2>
             <button
                 onclick="this.closest('.fixed').remove()"
-                class="rounded p-1 text-slate-400 transition hover:bg-slate-800 hover:text-slate-100"
+                class="shrink-0 cursor-pointer rounded-lg p-1.5 text-ink-500 transition hover:bg-ink-800 hover:text-ink-100"
                 aria-label="Cerrar"
             >✕</button>
         </div>
+
         <div class="overflow-y-auto px-6 py-5">
             {% if content %}
-                <div class="prose prose-invert prose-sm max-w-none">{{ content|safe }}</div>
+                <div class="readme-body">{{ content|safe }}</div>
             {% else %}
-                <p class="text-slate-400">Este proyecto no tiene README.md.</p>
+                <p class="py-8 text-center text-sm text-ink-500">Este proyecto no tiene README.md.</p>
             {% endif %}
         </div>
     </div>
