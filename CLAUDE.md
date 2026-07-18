@@ -42,7 +42,6 @@ hay ya construido y por qué*):
 - @docs/arquitectura.md
 - @docs/flujos-htmx.md
 - @docs/modelo-datos.md
-- @docs/admin.md
 
 ## Comandos habituales
 

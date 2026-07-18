@@ -81,6 +81,18 @@ recompilación del CSS en vivo, usa en su lugar `uv run python manage.py tailwin
 > durante la sincronización, vuelve a lanzarlo cada vez que quieras refrescar la actividad:
 > mientras no lo hagas, las fechas mostradas envejecen.
 
+### Admin de Django
+
+El admin estándar está en `/admin/` por si quieres inspeccionar o corregir el catálogo a mano.
+Necesitas un usuario:
+
+```bash
+uv run python manage.py createsuperuser
+```
+
+Ten en cuenta que `sync_projects` es la fuente de verdad: lo que edites a mano se sobrescribe en la
+siguiente sincronización.
+
 ## Comandos habituales
 
 ```bash
