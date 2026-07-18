@@ -14,7 +14,11 @@
     {% tailwind_css %}
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
-<body class="min-h-full bg-ink-950 font-sans text-ink-100 antialiased">
+{# hx-headers en el body: htmx lo hereda, así todo hx-post lleva el token CSRF. #}
+<body
+    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    class="min-h-full bg-ink-950 font-sans text-ink-100 antialiased"
+>
     {# Atmósfera: dos halos de color muy suaves, fijos tras el contenido. #}
     <div aria-hidden="true" class="pointer-events-none fixed inset-0 overflow-hidden">
         <div class="absolute -top-40 -left-32 h-[32rem] w-[32rem] rounded-full bg-brand-500/10 blur-[120px]"></div>

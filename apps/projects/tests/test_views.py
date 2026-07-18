@@ -3,6 +3,7 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from django.test import Client
 from django.urls import reverse
 
 from apps.projects.models import Project
@@ -94,3 +95,25 @@ def test_open_vscode_path_outside_root_does_not_run(client, settings, tmp_path, 
     assert response.status_code == 200
     assert b"Error al abrir" in response.content
     assert called == []
+
+
+def test_list_sends_csrf_token_to_htmx(client, project):
+    # Sin esta cabecera, todo hx-post se va en 403 (el client de tests no lo detecta).
+    assert b"X-CSRFToken" in client.get(reverse("projects:list")).content
+
+
+def test_open_vscode_with_csrf_enforced_succeeds(project, monkeypatch):
+    # El client por defecto lleva CSRF desactivado; aquí se exige de verdad para
+    # cubrir el 403 que sí ocurría en el navegador.
+    csrf_client = Client(enforce_csrf_checks=True)
+    monkeypatch.setattr("apps.projects.views.subprocess.Popen", lambda *a, **k: None)
+
+    csrf_client.get(reverse("projects:list"))
+    token = csrf_client.cookies["csrftoken"].value
+    response = csrf_client.post(
+        reverse("projects:open-vscode", args=[project.pk]),
+        headers={"x-csrftoken": token},
+    )
+
+    assert response.status_code == 200
+    assert b"Abriendo" in response.content
