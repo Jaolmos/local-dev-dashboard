@@ -15,8 +15,9 @@ uv run python manage.py createsuperuser
 Pide usuario, email (opcional) y contraseña. Los usuarios viven en la misma base de datos
 SQLite que el catálogo (`db.sqlite3`), así que basta con haber corrido `migrate` antes.
 
-Luego, con el servidor arrancado (`uv run python manage.py runserver`), entra en
-<http://127.0.0.1:8000/admin/> y accede con esas credenciales.
+Luego, con el servidor arrancado (`./run.sh`), entra en
+`http://127.0.0.1:<DASHBOARD_PORT>/admin/` (por defecto
+<http://127.0.0.1:8765/admin/>) y accede con esas credenciales.
 
 ## Qué se puede hacer desde el admin
 

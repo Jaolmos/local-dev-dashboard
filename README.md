@@ -47,6 +47,10 @@ PROJECTS_ROOT=~/code
 PROJECTS_ROOT=/home/tu-usuario/dev
 ```
 
+Opcionalmente, ajusta **`DASHBOARD_PORT`** (por defecto `8765`): el puerto en el que se sirve el
+panel. Se usa un puerto distinto al `8000` de Django a propósito, para poder tener el dashboard
+corriendo como segunda instancia sin chocar con otros proyectos.
+
 Genera también tu propia `DJANGO_SECRET_KEY`:
 
 ```bash
@@ -62,11 +66,15 @@ uv run python manage.py migrate
 # 4. IMPORTANTE: llena el catálogo escaneando PROJECTS_ROOT
 uv run python manage.py sync_projects
 
-# 5. Arranca (compila Tailwind y vigila cambios)
-uv run python manage.py tailwind runserver
+# 5. Arranca (compila Tailwind y sirve en DASHBOARD_PORT)
+./run.sh
 ```
 
-Abre <http://127.0.0.1:8000/>.
+Abre <http://127.0.0.1:8765/> (o el puerto que hayas puesto en `DASHBOARD_PORT`).
+
+`./run.sh` lee el puerto del `.env`, compila el CSS de Tailwind y arranca el servidor. Puedes
+forzar un puerto puntual pasándolo como argumento: `./run.sh 9001`. Para **desarrollo activo** con
+recompilación del CSS en vivo, usa en su lugar `uv run python manage.py tailwind runserver`.
 
 > **Ojo con el paso 4.** `migrate` solo crea las tablas, vacías. Si arrancas sin ejecutar
 > `sync_projects` verás el panel sin ningún proyecto. Y como la fecha de último commit se toma
@@ -76,6 +84,8 @@ Abre <http://127.0.0.1:8000/>.
 ## Comandos habituales
 
 ```bash
+./run.sh                                      # arranca en DASHBOARD_PORT (compila CSS + server)
+./run.sh 9001                                 # fuerza un puerto puntual
 uv run python manage.py runserver             # servidor de desarrollo (sin watch de Tailwind)
 uv run python manage.py tailwind runserver    # servidor + watch de Tailwind (recomendado en dev)
 uv run python manage.py sync_projects         # escanea PROJECTS_ROOT y actualiza el catálogo

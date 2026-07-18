@@ -47,6 +47,7 @@ hay ya construido y por qué*):
 ## Comandos habituales
 
 ```bash
+./run.sh                                       # arranca en DASHBOARD_PORT del .env (compila CSS + server)
 uv run python manage.py runserver             # servidor de desarrollo
 uv run python manage.py tailwind runserver    # server + watch de Tailwind (dev)
 uv run python manage.py makemigrations        # tras cambiar modelos
