@@ -9,7 +9,8 @@ producción**: prioriza simplicidad y DX sobre hardening.
 
 - **Backend:** Django 6.0.x. Paquete de proyecto: `config`. Apps de dominio bajo `apps/`.
 - **Gestor:** `uv` + `pyproject.toml` (entorno en `.venv`, usar `uv run <cmd>`).
-- **Frontend:** plantillas Django + HTMX (`django-htmx`) + partials (`django-template-partials`).
+- **Frontend:** plantillas Django + HTMX (`django-htmx`) + partials nativos de Django 6
+  (`{% partialdef %}` / `{% partial %}`, sin librería aparte).
 - **CSS:** Tailwind vía `django-tailwind-cli` (binario standalone, sin Node). htmx por CDN.
 - **BD:** SQLite (catálogo de proyectos).
 - **Git:** comandos nativos vía `subprocess` (sin GitPython). Requiere `git` en el sistema.

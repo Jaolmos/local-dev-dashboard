@@ -28,7 +28,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_htmx",
-    "template_partials",
     "django_tailwind_cli",
     "apps.projects",
 ]
