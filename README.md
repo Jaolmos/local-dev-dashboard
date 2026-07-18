@@ -5,7 +5,7 @@ vistazo, cómo va cada uno: estado de Git, stack detectado, README y última act
 rápidas (abrir en VSCode, leer la documentación).
 
 Es una herramienta **solo-local**: pensada para correr en `127.0.0.1` mientras trabajas, nunca para
-desplegar a producción.
+desplegar a producción. Está pensada y probada **para Linux**.
 
 ## Qué hace
 
@@ -21,6 +21,8 @@ desplegar a producción.
 
 ## Requisitos
 
+- **Linux** (es el único sistema en el que se ha probado; las rutas y la acción de abrir en VSCode
+  asumen un entorno tipo Unix)
 - Python 3.12+
 - [`uv`](https://docs.astral.sh/uv/)
 - `git` disponible en el `PATH`
