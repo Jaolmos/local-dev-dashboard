@@ -8,8 +8,8 @@ viven en `.claude/.rules/`); esto es la explicación con contexto y ejemplos con
 Hay **dos velocidades** de datos, y toda la arquitectura gira en torno a esa distinción:
 
 1. **Catálogo (SQLite, rápido)**: lo que hace falta para pintar la lista al instante.
-   Nombre, ruta, descripción, stack, fecha del último commit. Se llena con
-   `sync_projects` y no cambia hasta la siguiente sincronización.
+   Nombre, ruta, descripción, stack, fecha del último commit. Se refresca **en cada carga
+   de la página** (el escaneo cuesta décimas) y también desde el comando `sync_projects`.
 2. **Estado vivo (bajo demanda, más lento)**: lo que puede cambiar en cualquier momento
    mientras trabajas — rama actual, si hay cambios sin commitear, ahead/behind del
    remoto. Se calcula **en cada petición**, vía HTMX, y **nunca se guarda**.
@@ -31,7 +31,7 @@ apps/projects/
 ├── management/commands/
 │   └── sync_projects.py    # envoltorio CLI de catalog.sync (permite --prune)
 ├── views.py              # CBV finas: leen Project, llaman a un service, renderizan
-├── urls.py               # 4 rutas
+├── urls.py               # 5 rutas
 └── templates/projects/
     ├── project_list.html          # página completa (extiende base.html)
     └── partials/                    # fragmentos que devuelven las vistas HTMX
@@ -133,8 +133,12 @@ explorador…), debería repetir esta misma validación.
 
 ## Qué NO hace la app (por diseño)
 
-- No vigila los repos en tiempo real (sin watcher de filesystem); el catálogo envejece
-  hasta el siguiente `sync_projects`.
+- No vigila los repos en tiempo real (sin watcher de filesystem) ni refresca la página
+  sola: lo que ves se congela hasta que recargas. Recargar sí lo actualiza todo, porque
+  el sync va en la propia petición.
+- No borra solo: un proyecto que desaparece del disco se queda de fantasma en el catálogo
+  hasta un `sync_projects --prune` manual. Es la única operación destructiva de la app y
+  se ha dejado deliberadamente fuera del camino automático.
 - No escribe en los repos: todo el uso de `git` es de solo lectura (`status`,
   `rev-parse`, `rev-list`, `log`) — ver `services/git.py`.
 - No tiene autenticación ni pretende exponerse fuera de `127.0.0.1`.

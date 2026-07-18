@@ -40,11 +40,12 @@ deliberada:
 un valor que todavía no existe hasta que se renderiza la plantilla. Para poder hacer
 "lo más reciente arriba" hace falta que la fecha ya esté en la fila antes del `SELECT`.
 
-Contrapartida directa: la fecha que ves en cada tarjeta ("hace 3 días") es la que había
-en el último `sync_projects`, no la real en este instante. Si hicieras un commit ahora
-mismo en uno de tus proyectos, la tarjeta seguiría mostrando la fecha vieja —y el
-proyecto seguiría en su posición vieja del orden— hasta el siguiente
-`sync_projects`. Esto está avisado en el `README.md` del proyecto, no es un bug latente.
+Contrapartida directa: la fecha que ves en cada tarjeta ("hace 3 días") es una foto, no
+un dato vivo. Como la sincronización corre en cada carga de la página, la foto es de hace
+un instante y en la práctica no se nota — pero si haces un commit con el dashboard ya
+abierto, esa tarjeta seguirá mostrando la fecha vieja, y en su posición vieja del orden,
+hasta que **recargues**. No es un bug latente: es el precio de poder ordenar por actividad
+desde SQLite.
 
 ## `Meta.ordering` con `F(...).desc(nulls_last=True)`
 

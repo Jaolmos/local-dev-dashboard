@@ -9,10 +9,11 @@ apps/<app>/
 │   ├── discovery.py     # escaneo de PROJECTS_ROOT (pathlib) + 1ª línea del README
 │   ├── git.py           # estado git (subprocess, solo lectura) → dataclass GitStatus
 │   ├── stack.py         # detección de stack por ficheros marcadores → list[str]
-│   └── readme.py        # markdown → HTML
+│   ├── readme.py        # markdown → HTML
+│   └── catalog.py       # vuelca lo descubierto en SQLite → dataclass SyncResult
 ├── views.py             # CBV finas: orquestan services y devuelven templates/partials
 ├── urls.py              # rutas de la app (namespace app_name)
-├── management/commands/ # comandos (sync_projects) — orquestan services + ORM
+├── management/commands/ # comandos (sync_projects) — envoltorio CLI de un service
 ├── templates/<app>/     # plantillas y partials/ HTMX
 └── tests/               # tests por capa
 ```
@@ -25,6 +26,8 @@ apps/<app>/
   (dataclasses, listas, dicts). No importan `request`, `HttpResponse` ni modelos si no hace falta.
 - **El catálogo (SQLite) es la fuente para la carga rápida**; las operaciones pesadas (git,
   readme) se calculan **bajo demanda** vía HTMX y **no** se persisten.
+- **La lógica compartida entre un comando y una vista vive en un service**, no en el comando:
+  `sync_projects` es un envoltorio CLI de `catalog.sync`, que también usa `ProjectListView`.
 - **`config/`** es el paquete del proyecto (settings, urls, wsgi/asgi), no una app de dominio.
 - Las apps de dominio viven en **`apps/`** y se declaran como `apps.<nombre>` en `INSTALLED_APPS`
   (con `label` corto en su `AppConfig`).
@@ -37,7 +40,7 @@ En la BD solo vive el **catálogo**, que es lo que permite pintar la lista al in
 El **estado vivo de Git** (rama, cambios sin confirmar, ahead/behind) y el **HTML del README**
 se calculan al vuelo bajo demanda vía HTMX y **no** se guardan.
 
-`last_commit` es la excepción deliberada: se toma en cada `sync_projects` como instantánea,
+`last_commit` es la excepción deliberada: se toma en cada sincronización como instantánea,
 no en vivo. Se persiste porque el orden por actividad lo hace la BD y no se puede ordenar por
-un dato que se calcula al renderizar. Como contrapartida, la fecha mostrada envejece hasta la
-siguiente sincronización.
+un dato que se calcula al renderizar. Como el catálogo se sincroniza en cada carga de la
+página, esa instantánea es siempre reciente; solo envejece si dejas la pestaña abierta.

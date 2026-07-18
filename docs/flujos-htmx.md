@@ -9,11 +9,18 @@ todo es atributos `hx-*` sobre HTML normal.
 ## 1. Carga de la página — sin HTMX, es Django puro
 
 ```
-GET /  →  ProjectListView (ListView)  →  Project.objects.all() (ya ordenado por Meta.ordering)
+GET /  →  ProjectListView (ListView)  →  catalog.sync(PROJECTS_ROOT)   # refresca el catálogo
+       →  Project.objects.all() (ya ordenado por Meta.ordering)
        →  project_list.html  →  incluye legend.html + un project_card.html por proyecto
 ```
 
-Esto es instantáneo porque **solo lee SQLite**. Ningún `git` se ejecuta todavía. Cada
+El sync escanea el disco antes de renderizar, así que la lista sale siempre fresca —fechas,
+orden por actividad y proyectos recién clonados— sin pasar por la terminal. Cuesta unas
+décimas (la página entera se sirve en ~0,1 s con 16 repos), y va sin `prune`: borrar del
+catálogo sigue siendo manual.
+
+Aun así **no se ejecuta ningún `git status`** en esta petición: el sync solo lee `git log`
+para la fecha del último commit. El estado vivo va aparte. Cada
 tarjeta sale con un punto gris pulsante (`bg-ink-700 animate-pulse`,
 `project_card.html:18`) en el hueco donde irá el estado de Git — ese hueco lleva
 `hx-trigger="revealed"`, así que la petición real se dispara sola en cuanto el
@@ -96,21 +103,36 @@ hx-swap="outerHTML"
 ```
 
 `outerHTML` es la clave aquí: el botón **se sustituye a sí mismo** por el resultado
-(`open_result.html`), que es un botón ya `disabled` con "Abriendo…" o "Error al abrir"
-según si `Popen` lanzó sin excepción. No hay vuelta atrás a botón activo salvo recargar
-la página — es intencional, evita doble clic que abra VSCode dos veces.
+(`open_result.html`), un botón `disabled` con "Abierto ✓" o "Error al abrir" según si
+`Popen` lanzó sin excepción.
+
+Ese feedback es **transitorio**: el propio partial trae `hx-trigger="load delay:2s"`
+apuntando a `open-button`, así que a los dos segundos el botón vuelve a su estado normal
+y se puede reabrir sin recargar. Los dos segundos disabled hacen de paso el trabajo de
+evitar el doble clic que abriría VSCode dos veces.
+
+```
+GET /<pk>/open/button/  →  OpenButtonView.get()  →  partials/open_button.html
+```
+
+El botón vive en su propio partial precisamente para esto: lo incluyen tanto
+`project_card.html` como el endpoint de restauración, así que no pueden desincronizarse.
 
 `Popen` (no `run`) porque no interesa esperar a que VSCode termine ni capturar su
 salida; el proceso queda huérfano del servidor Django a propósito.
 
-## Resumen de las 4 rutas
+Ojo: sin token CSRF este POST se va en **403**. Lo cubre el `hx-headers` del `<body>` de
+`base.html`, que htmx hereda a todos los descendientes.
+
+## Resumen de las 5 rutas
 
 | Ruta | Vista | Dispara | Devuelve |
 |---|---|---|---|
-| `GET /` | `ProjectListView` | carga de página | página completa |
+| `GET /` | `ProjectListView` | carga de página (sincroniza el catálogo) | página completa |
 | `GET /<pk>/git/` | `GitStatusView` | `hx-trigger="revealed"` de cada tarjeta | `git_status.html` |
 | `GET /<pk>/readme/` | `ReadmeView` | clic en "Docs" | `readme_modal.html` (a `#modal-root`) |
 | `POST /<pk>/open/` | `OpenVSCodeView` | clic en "Abrir en VSCode" | `open_result.html` (reemplaza el botón) |
+| `GET /<pk>/open/button/` | `OpenButtonView` | `load delay:2s` desde `open_result.html` | `open_button.html` (restaura el botón) |
 
 Ver también: [arquitectura](arquitectura.md) para el porqué de la separación
 catálogo / estado-vivo.
