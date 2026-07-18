@@ -63,10 +63,7 @@ Después:
 # 3. Base de datos
 uv run python manage.py migrate
 
-# 4. IMPORTANTE: llena el catálogo escaneando PROJECTS_ROOT
-uv run python manage.py sync_projects
-
-# 5. Arranca (compila Tailwind y sirve en DASHBOARD_PORT)
+# 4. Arranca (compila Tailwind y sirve en DASHBOARD_PORT)
 ./run.sh
 ```
 
@@ -76,10 +73,10 @@ Abre <http://127.0.0.1:8765/> (o el puerto que hayas puesto en `DASHBOARD_PORT`)
 forzar un puerto puntual pasándolo como argumento: `./run.sh 9001`. Para **desarrollo activo** con
 recompilación del CSS en vivo, usa en su lugar `uv run python manage.py tailwind runserver`.
 
-> **Ojo con el paso 4.** `migrate` solo crea las tablas, vacías. Si arrancas sin ejecutar
-> `sync_projects` verás el panel sin ningún proyecto. Y como la fecha de último commit se toma
-> durante la sincronización, vuelve a lanzarlo cada vez que quieras refrescar la actividad:
-> mientras no lo hagas, las fechas mostradas envejecen.
+> **No hace falta poblar el catálogo a mano.** El panel escanea `PROJECTS_ROOT` en cada carga de
+> la página (cuesta ~0,1 s con 16 repos), así que la primera visita ya sale llena y un proyecto
+> recién clonado aparece con solo recargar. El comando `sync_projects` sigue estando para
+> sincronizar desde la terminal y es el único que puede **borrar** del catálogo, con `--prune`.
 
 ### Admin de Django
 

@@ -1,5 +1,6 @@
 """Vistas del panel: listado desde SQLite y operaciones bajo demanda vía HTMX."""
 
+import logging
 import subprocess
 
 from django.conf import settings
@@ -10,15 +11,27 @@ from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
 
 from .models import Project
-from .services import git, readme
+from .services import catalog, git, readme
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectListView(ListView):
-    """Carga instantánea del catálogo de proyectos desde SQLite."""
+    """Listado del catálogo, resincronizado con el disco en cada carga."""
 
     model = Project
     template_name = "projects/project_list.html"
     context_object_name = "projects"
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        # El escaneo cuesta décimas, así que cabe en la propia petición: abrir el
+        # panel siempre muestra datos frescos. Sin --prune: borrar sigue siendo manual.
+        try:
+            catalog.sync(settings.PROJECTS_ROOT)
+        except OSError:
+            # Si el disco falla, mejor el catálogo viejo que una página rota.
+            logger.exception("Falló la sincronización del catálogo")
+        return super().get(request, *args, **kwargs)
 
 
 class GitStatusView(SingleObjectMixin, View):

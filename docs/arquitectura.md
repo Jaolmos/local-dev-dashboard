@@ -26,9 +26,10 @@ apps/projects/
 │   ├── discovery.py       # escanea PROJECTS_ROOT, encuentra repos
 │   ├── git.py              # ejecuta `git` y parsea la salida
 │   ├── stack.py             # detecta tecnologías por ficheros marcadores
-│   └── readme.py             # Markdown -> HTML
+│   ├── readme.py             # Markdown -> HTML
+│   └── catalog.py             # vuelca lo descubierto en SQLite (update_or_create)
 ├── management/commands/
-│   └── sync_projects.py    # orquesta discovery + ORM (el único que escribe en BD)
+│   └── sync_projects.py    # envoltorio CLI de catalog.sync (permite --prune)
 ├── views.py              # CBV finas: leen Project, llaman a un service, renderizan
 ├── urls.py               # 4 rutas
 └── templates/projects/
@@ -80,11 +81,27 @@ ya en el `DiscoveredProject`, listos para que `sync_projects` los escriba en el 
 estructura de carpetas más profunda queda fuera del escaneo, ese es el primer sitio
 donde tocar.
 
-## El comando `sync_projects` — el único que escribe
+## La sincronización del catálogo
 
-Es el puente entre `discovery` (que solo lee disco) y el catálogo (SQLite). Por cada
-`DiscoveredProject` encontrado hace un `update_or_create` usando `path` como clave
-única — así relanzar el comando no duplica proyectos, solo actualiza sus datos.
+El puente entre `discovery` (que solo lee disco) y el catálogo (SQLite) es
+`services/catalog.py`. Por cada `DiscoveredProject` encontrado hace un
+`update_or_create` usando `path` como clave única — así relanzarlo no duplica
+proyectos, solo actualiza sus datos.
+
+Ese service tiene **dos llamadores**:
+
+1. **`ProjectListView`**, en cada carga de la página. El escaneo de ~16 repos cuesta
+   unas décimas (la página entera se sirve en ~0,1 s), así que cabe dentro de la propia
+   petición: abrir el panel muestra siempre datos frescos —fechas, orden por actividad,
+   proyectos recién clonados— sin tener que ir a la terminal. Va **sin `prune`** a
+   propósito, y envuelto en un `try/except OSError`: si el disco falla, se muestra el
+   catálogo viejo en vez de romper la página con un 500.
+2. **El comando `sync_projects`**, que sigue existiendo para sincronizar desde la
+   terminal y es el único que puede pasar `--prune`.
+
+Borrar es la única operación destructiva de la app, y por eso se ha dejado como acto
+deliberado: un `--prune` automático en cada carga de página podría cargarse filas por
+un fallo transitorio de disco o un `PROJECTS_ROOT` mal montado.
 
 Con `--prune` además borra del catálogo los que ya no aparecieron en el escaneo (se
 movieron o se borraron del disco). Sin `--prune`, un proyecto borrado se queda "fantasma"

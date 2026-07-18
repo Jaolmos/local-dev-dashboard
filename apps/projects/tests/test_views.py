@@ -97,6 +97,34 @@ def test_open_vscode_path_outside_root_does_not_run(client, settings, tmp_path, 
     assert called == []
 
 
+def test_list_syncs_catalog_on_load(client, settings, tmp_path, monkeypatch):
+    # Abrir el panel debe reflejar lo que hay en disco sin pasar por el comando.
+    settings.PROJECTS_ROOT = tmp_path
+    monkeypatch.setattr(
+        "apps.projects.views.catalog.sync",
+        lambda root, **kw: Project.objects.create(name="recien-clonado", path=str(root / "new")),
+    )
+
+    response = client.get(reverse("projects:list"))
+
+    assert b"recien-clonado" in response.content
+
+
+def test_list_survives_a_failing_sync(client, settings, tmp_path, monkeypatch):
+    # Si el escaneo peta, se muestra el catálogo viejo en vez de un 500.
+    settings.PROJECTS_ROOT = tmp_path
+    Project.objects.create(name="cacheado", path=str(tmp_path / "cacheado"))
+    monkeypatch.setattr(
+        "apps.projects.views.catalog.sync",
+        lambda *a, **kw: (_ for _ in ()).throw(OSError("disco fallando")),
+    )
+
+    response = client.get(reverse("projects:list"))
+
+    assert response.status_code == 200
+    assert b"cacheado" in response.content
+
+
 def test_list_sends_csrf_token_to_htmx(client, project):
     # Sin esta cabecera, todo hx-post se va en 403 (el client de tests no lo detecta).
     assert b"X-CSRFToken" in client.get(reverse("projects:list")).content

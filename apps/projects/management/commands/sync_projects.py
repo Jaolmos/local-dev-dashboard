@@ -5,8 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from apps.projects.models import Project
-from apps.projects.services import discovery
+from apps.projects.services import catalog
 
 
 class Command(BaseCommand):
@@ -27,34 +26,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         root: Path = options["root"]
-        found = discovery.scan_projects(root)
-        seen_paths = set()
-        created = updated = 0
-
-        for item in found:
-            path_str = str(item.path)
-            seen_paths.add(path_str)
-            _, was_created = Project.objects.update_or_create(
-                path=path_str,
-                defaults={
-                    "name": item.name,
-                    "description": item.description,
-                    "stack_tags": item.stack_tags,
-                    "last_commit": item.last_commit,
-                },
-            )
-            created += was_created
-            updated += not was_created
-
-        pruned = 0
-        if options["prune"]:
-            stale = Project.objects.exclude(path__in=seen_paths)
-            pruned = stale.count()
-            stale.delete()
+        result = catalog.sync(root, prune=options["prune"])
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Sincronización completada: {created} creados, {updated} actualizados, "
-                f"{pruned} eliminados (raíz: {root})."
+                f"Sincronización completada: {result.created} creados, "
+                f"{result.updated} actualizados, {result.pruned} eliminados (raíz: {root})."
             )
         )
