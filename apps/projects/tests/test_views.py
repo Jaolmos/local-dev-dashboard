@@ -56,6 +56,21 @@ def test_git_status_returns_partial(client, project):
     assert b"sin git" in response.content
 
 
+def test_git_status_degrades_when_git_fails(client, project, monkeypatch):
+    # git colgado -> partial con aviso, nunca un 500.
+    from apps.projects.services.git import GitStatus
+
+    monkeypatch.setattr(
+        "apps.projects.views.git.get_status",
+        lambda path: GitStatus(is_repo=True, error=True),
+    )
+
+    response = client.get(reverse("projects:git-status", args=[project.pk]))
+
+    assert response.status_code == 200
+    assert "git no responde" in response.content.decode()
+
+
 def test_readme_returns_partial(client, project):
     response = client.get(reverse("projects:readme", args=[project.pk]))
 

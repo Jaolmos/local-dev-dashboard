@@ -1,4 +1,6 @@
-{% if git.is_repo %}
+{% if git.error %}
+<span class="animate-fade text-xs text-ink-600" title="git dio timeout o falló en este repo">git no responde</span>
+{% elif git.is_repo %}
 <div class="flex animate-fade items-center gap-1.5 text-xs">
     <span class="min-w-0 truncate font-mono text-ink-500" title="{{ git.branch }}">{{ git.branch }}</span>
 

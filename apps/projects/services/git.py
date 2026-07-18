@@ -16,6 +16,8 @@ class GitStatus:
     ahead: int = 0
     behind: int = 0
     has_upstream: bool = False
+    # git no respondió (timeout, repo corrupto): es repo, pero no hay datos fiables.
+    error: bool = False
 
 
 def _run(path: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -29,20 +31,27 @@ def _run(path: Path, *args: str) -> subprocess.CompletedProcess[str]:
 
 
 def get_status(path: Path) -> GitStatus:
-    """Devuelve el estado actual de Git del repositorio en ``path``."""
+    """Devuelve el estado actual de Git del repositorio en ``path``.
+
+    Si git no responde (timeout, repo corrupto) devuelve ``error=True`` en vez de
+    propagar: la tarjeta debe degradarse, no romper con un 500.
+    """
     if not (path / ".git").exists():
         return GitStatus(is_repo=False)
 
-    branch = _run(path, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
-    is_dirty = bool(_run(path, "status", "--porcelain").stdout.strip())
+    try:
+        branch = _run(path, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
+        is_dirty = bool(_run(path, "status", "--porcelain").stdout.strip())
 
-    ahead = behind = 0
-    counts = _run(path, "rev-list", "--left-right", "--count", "@{u}...HEAD")
-    has_upstream = counts.returncode == 0
-    if has_upstream:
-        parts = counts.stdout.split()
-        if len(parts) == 2:
-            behind, ahead = int(parts[0]), int(parts[1])
+        ahead = behind = 0
+        counts = _run(path, "rev-list", "--left-right", "--count", "@{u}...HEAD")
+        has_upstream = counts.returncode == 0
+        if has_upstream:
+            parts = counts.stdout.split()
+            if len(parts) == 2:
+                behind, ahead = int(parts[0]), int(parts[1])
+    except (subprocess.SubprocessError, OSError):
+        return GitStatus(is_repo=True, error=True)
 
     return GitStatus(
         is_repo=True,

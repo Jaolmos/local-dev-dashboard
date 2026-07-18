@@ -74,6 +74,19 @@ def test_last_commit_none_when_repo_has_no_commits(tmp_path):
     assert git.get_last_commit(tmp_path) is None
 
 
+def test_status_reports_error_when_git_times_out(repo, monkeypatch):
+    # Un mount de red muerto no debe tirar la tarjeta con un 500.
+    def _timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd="git", timeout=5)
+
+    monkeypatch.setattr("apps.projects.services.git.subprocess.run", _timeout)
+
+    status = git.get_status(repo)
+
+    assert status.is_repo is True
+    assert status.error is True
+
+
 def test_last_commit_none_when_git_times_out(repo, monkeypatch):
     # Un repo lento no debe abortar la sincronización completa.
     def _timeout(*args, **kwargs):
