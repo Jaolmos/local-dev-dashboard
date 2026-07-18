@@ -9,6 +9,7 @@ dependencies = [
     "django-tailwind-cli>=4.6",
     "django-environ>=0.14",
     "markdown>=3.10",
+    "nh3>=0.3.6",
 ]
 
 [dependency-groups]
