@@ -64,6 +64,19 @@ class ReadmeView(SingleObjectMixin, View):
         )
 
 
+class OpenButtonView(SingleObjectMixin, View):
+    """Devuelve el botón de abrir a su estado inicial tras el feedback."""
+
+    model = Project
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        return render(
+            request,
+            "projects/partials/open_button.html",
+            {"project": self.get_object()},
+        )
+
+
 class OpenVSCodeView(SingleObjectMixin, View):
     """Abre el proyecto en VSCode ejecutando ``code <ruta>``."""
 

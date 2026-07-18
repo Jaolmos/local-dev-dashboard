@@ -74,7 +74,7 @@ def test_open_vscode_valid_path_launches_code(client, project, monkeypatch):
 
     assert response.status_code == 200
     assert "projects/partials/open_result.html" in _template_names(response)
-    assert b"Abriendo" in response.content
+    assert b"Abierto" in response.content
     assert calls and calls[0][0] == "code"
 
 
@@ -95,6 +95,24 @@ def test_open_vscode_path_outside_root_does_not_run(client, settings, tmp_path, 
     assert response.status_code == 200
     assert b"Error al abrir" in response.content
     assert called == []
+
+
+def test_open_result_restores_the_button(client, project, monkeypatch):
+    # El feedback es transitorio: debe pedir la vuelta del botón, no quedarse fijo.
+    monkeypatch.setattr("apps.projects.views.subprocess.Popen", lambda *a, **k: None)
+
+    response = client.post(reverse("projects:open-vscode", args=[project.pk]))
+
+    assert b"Abierto" in response.content
+    assert reverse("projects:open-button", args=[project.pk]).encode() in response.content
+
+
+def test_open_button_returns_a_usable_button(client, project):
+    response = client.get(reverse("projects:open-button", args=[project.pk]))
+
+    assert response.status_code == 200
+    assert b"Abrir en VSCode" in response.content
+    assert b"disabled" not in response.content
 
 
 def test_list_syncs_catalog_on_load(client, settings, tmp_path, monkeypatch):
@@ -144,4 +162,4 @@ def test_open_vscode_with_csrf_enforced_succeeds(project, monkeypatch):
     )
 
     assert response.status_code == 200
-    assert b"Abriendo" in response.content
+    assert b"Abierto" in response.content

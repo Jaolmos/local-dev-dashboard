@@ -1,7 +1,11 @@
+{# Estado transitorio: a los 2s el botón vuelve a su sitio y se puede reabrir. #}
 <button
-    class="flex-1 rounded-lg px-3 py-2 text-sm font-semibold ring-1 ring-inset
+    hx-get="{% url 'projects:open-button' project.pk %}"
+    hx-trigger="load delay:2s"
+    hx-swap="outerHTML"
+    class="animate-fade flex-1 rounded-lg px-3 py-2 text-sm font-semibold ring-1 ring-inset
     {% if ok %}bg-brand-500/10 text-brand-400 ring-brand-500/30{% else %}bg-rose-500/10 text-rose-300 ring-rose-500/30{% endif %}"
     disabled
 >
-    {% if ok %}Abriendo…{% else %}Error al abrir{% endif %}
+    {% if ok %}Abierto ✓{% else %}Error al abrir{% endif %}
 </button>
