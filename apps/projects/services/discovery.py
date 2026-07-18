@@ -5,6 +5,9 @@ from pathlib import Path
 
 from . import stack
 
+# Niveles de subcarpetas a explorar bajo la raíz (los repos suelen estar agrupados).
+_MAX_DEPTH = 3
+
 
 @dataclass(frozen=True)
 class DiscoveredProject:
@@ -31,21 +34,35 @@ def _read_description(project_path: Path) -> str:
     return ""
 
 
-def scan_projects(root: Path) -> list[DiscoveredProject]:
-    """Devuelve los subdirectorios de ``root`` que son repositorios Git."""
+def scan_projects(root: Path, max_depth: int = _MAX_DEPTH) -> list[DiscoveredProject]:
+    """Recorre ``root`` hasta ``max_depth`` niveles y devuelve los repositorios Git.
+
+    Al encontrar un repo (carpeta con ``.git``) lo registra y no sigue bajando dentro,
+    así se soportan proyectos agrupados en subcarpetas sin escanear su árbol interno.
+    """
     if not root.is_dir():
         return []
 
     discovered: list[DiscoveredProject] = []
-    for entry in sorted(root.iterdir()):
-        if not entry.is_dir() or not (entry / ".git").exists():
+    _walk(root, max_depth, discovered)
+    return sorted(discovered, key=lambda project: str(project.path))
+
+
+def _walk(directory: Path, depth_left: int, out: list[DiscoveredProject]) -> None:
+    """Explora ``directory`` en profundidad acumulando repos en ``out``."""
+    for entry in sorted(directory.iterdir()):
+        # Se ignoran ficheros y carpetas ocultas (.git, .cache, etc.).
+        if not entry.is_dir() or entry.name.startswith("."):
             continue
-        discovered.append(
-            DiscoveredProject(
-                name=entry.name,
-                path=entry,
-                description=_read_description(entry),
-                stack_tags=stack.detect(entry),
+        if (entry / ".git").exists():
+            out.append(
+                DiscoveredProject(
+                    name=entry.name,
+                    path=entry,
+                    description=_read_description(entry),
+                    stack_tags=stack.detect(entry),
+                )
             )
-        )
-    return discovered
+            continue  # no se baja dentro de un repositorio ya detectado
+        if depth_left > 1:
+            _walk(entry, depth_left - 1, out)
