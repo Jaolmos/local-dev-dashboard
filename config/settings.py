@@ -16,8 +16,8 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env("DJANGO_DEBUG")
 ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
 
-# Carpeta raíz que escanea el radar de proyectos (auto-discovery).
-PROJECTS_ROOT = Path(env("PROJECTS_ROOT", default=str(BASE_DIR.parent)))
+# Carpeta raíz que escanea el radar de proyectos (auto-discovery). Admite ~.
+PROJECTS_ROOT = Path(env("PROJECTS_ROOT", default=str(BASE_DIR.parent))).expanduser()
 
 
 INSTALLED_APPS = [
