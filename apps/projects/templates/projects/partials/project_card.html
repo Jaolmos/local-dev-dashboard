@@ -5,7 +5,7 @@
     style="animation-delay: {{ forloop.counter0 }}0ms"
 >
     <div class="flex items-start justify-between gap-3">
-        {# min-h para dos líneas: alinea tags y pie aunque el nombre ocupe solo una. #}
+        {# min-h para dos líneas: deja las descripciones a la misma altura. #}
         <h2 class="min-h-14 min-w-0 flex-1 text-lg font-semibold tracking-tight break-words text-ink-100 transition-colors group-hover:text-white">
             {{ project.name }}
         </h2>
@@ -25,18 +25,19 @@
         {{ project.description|default:"Sin descripción" }}
     </p>
 
-    {% if project.stack_tags %}
-    <div class="mt-3 flex flex-wrap gap-1.5">
-        {% for tag in project.stack_tags %}
-        <span class="rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ tag|stack_color }}">
-            {{ tag }}
-        </span>
-        {% endfor %}
-    </div>
-    {% endif %}
+    {# Pie anclado abajo: mt-auto en el grupo, no en la hora, así los tags no se despegan. #}
+    <div class="mt-auto">
+        {% if project.stack_tags %}
+        <div class="flex flex-wrap gap-1.5 pt-3">
+            {% for tag in project.stack_tags %}
+            <span class="rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset {{ tag|stack_color }}">
+                {{ tag }}
+            </span>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-    {# Actividad: siempre presente, así el pie de todas las tarjetas queda a la misma altura. #}
-    <p class="mt-auto flex items-center gap-1.5 pt-4 text-xs text-ink-500">
+        <p class="flex items-center gap-1.5 pt-4 text-xs text-ink-500">
         <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <circle cx="12" cy="12" r="9" />
             <path d="M12 7v5l3 2" stroke-linecap="round" />
@@ -48,17 +49,18 @@
         {% else %}
             <span>sin commits</span>
         {% endif %}
-    </p>
+        </p>
 
-    <div class="flex gap-2 pt-3">
-        {% include "projects/partials/open_button.html" %}
-        <button
-            hx-get="{% url 'projects:readme' project.pk %}"
-            hx-target="#modal-root"
-            hx-swap="innerHTML"
-            class="cursor-pointer rounded-lg border border-ink-700 px-3 py-2 text-sm font-medium text-ink-300 transition hover:border-ink-500 hover:bg-ink-800 hover:text-ink-100 focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 focus-visible:outline-none"
-        >
-            Docs
-        </button>
+        <div class="flex gap-2 pt-3">
+            {% include "projects/partials/open_button.html" %}
+            <button
+                hx-get="{% url 'projects:readme' project.pk %}"
+                hx-target="#modal-root"
+                hx-swap="innerHTML"
+                class="cursor-pointer rounded-lg border border-ink-700 px-3 py-2 text-sm font-medium text-ink-300 transition hover:border-ink-500 hover:bg-ink-800 hover:text-ink-100 focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 focus-visible:outline-none"
+            >
+                Docs
+            </button>
+        </div>
     </div>
 </article>

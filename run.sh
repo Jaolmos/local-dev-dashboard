@@ -19,7 +19,9 @@ PORT="${PORT:-8765}"
 
 # Compilar el CSS antes de servir: garantiza que la página sale con estilos
 # en el primer arranque. Para desarrollo con CSS en vivo, usar 'tailwind runserver'.
-uv run python manage.py tailwind build
+# --force porque sin él solo mira el CSS de entrada: si cambiaste clases en una
+# plantilla, se salta la compilación y sirve CSS viejo.
+uv run python manage.py tailwind build --force
 
 echo "Dashboard en http://127.0.0.1:${PORT}/"
 uv run python manage.py runserver "127.0.0.1:${PORT}"
