@@ -73,6 +73,23 @@ GET /<pk>/readme/  →  ReadmeView.get()
 El `nh3.clean()` no es opcional: el modal pinta el resultado con `|safe` y el README viene
 de un repo que puede no ser tuyo. Ver [arquitectura](arquitectura.md#seguridad-aun-siendo-una-app-local).
 
+**Las imágenes locales necesitan una ruta propia.** Un README escribe
+`![captura](screenshots/x.png)`, y el navegador resolvería eso contra la raíz del panel,
+donde no hay nada — salían rotas. Por eso `readme.render()` recibe un `asset_base` y
+reescribe esas rutas relativas (las absolutas y las `https://` se dejan intactas):
+
+```
+GET /<pk>/readme/asset/<ruta>  →  ReadmeAssetView.get()  →  FileResponse del fichero
+```
+
+La reescritura ocurre **después** de sanitizar, para que `nh3` no vea ya nuestras URLs. Y la
+vista valida dos cosas antes de servir: que la ruta resuelta siga dentro de la carpeta del
+proyecto (corta los `../`) y que la extensión sea de imagen — así un README no puede pedir
+el `.env` del repo. Cualquier otra cosa es un 404.
+
+En el modal se pintan como miniaturas (`max-height` en `.readme-body img`) y un clic
+alterna la clase `is-expanded` para verlas a ancho completo.
+
 Target especial: en vez de reemplazar algo dentro de la tarjeta, el botón "Docs" apunta
 a un contenedor vacío que vive fuera del grid, al final de `base.html`:
 
@@ -131,13 +148,14 @@ salida; el proceso queda huérfano del servidor Django a propósito.
 Ojo: sin token CSRF este POST se va en **403**. Lo cubre el `hx-headers` del `<body>` de
 `base.html`, que htmx hereda a todos los descendientes.
 
-## Resumen de las 5 rutas
+## Resumen de las 6 rutas
 
 | Ruta | Vista | Dispara | Devuelve |
 |---|---|---|---|
 | `GET /` | `ProjectListView` | carga de página (sincroniza el catálogo) | página completa |
 | `GET /<pk>/git/` | `GitStatusView` | `hx-trigger="revealed"` de cada tarjeta | `git_status.html` |
 | `GET /<pk>/readme/` | `ReadmeView` | clic en "Docs" | `readme_modal.html` (a `#modal-root`) |
+| `GET /<pk>/readme/asset/<ruta>` | `ReadmeAssetView` | cada `<img>` del README abierto | el fichero de imagen |
 | `POST /<pk>/open/` | `OpenVSCodeView` | clic en "Abrir en VSCode" | `open_result.html` (reemplaza el botón) |
 | `GET /<pk>/open/button/` | `OpenButtonView` | `load delay:2s` desde `open_result.html` | `open_button.html` (restaura el botón) |
 

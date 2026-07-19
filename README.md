@@ -7,6 +7,8 @@ rápidas (abrir en VSCode, leer la documentación).
 Es una herramienta **solo-local**: pensada para correr en `127.0.0.1` mientras trabajas, nunca para
 desplegar a producción. Está pensada y probada **para Linux**.
 
+![El panel con las tarjetas de cada proyecto](screenshots/dashboard.png)
+
 ## Qué hace
 
 - **Escanea** la carpeta donde guardas tus proyectos (recursivamente, hasta 3 niveles) y detecta
@@ -17,8 +19,13 @@ desplegar a producción. Está pensada y probada **para Linux**.
   (`*.py`, `*.ipynb`, `*.csproj`). Se muestra como etiquetas con color por tecnología.
 - **Estado de Git en vivo**, cargado bajo demanda vía HTMX al aparecer cada tarjeta: rama, si hay
   cambios sin confirmar y cuántos commits llevas por delante/por detrás del remoto.
-- **README en un modal**, renderizado de Markdown a HTML sin salir del panel.
+- **README en un modal**, renderizado de Markdown a HTML sin salir del panel, con las imágenes
+  del propio repo como miniaturas ampliables al clic.
 - **Abrir en VSCode** con un clic.
+
+El botón "Docs" de cada tarjeta abre el README sin salir del panel:
+
+![El README de un proyecto abierto en el modal, con sus capturas como miniaturas](screenshots/readme-modal.png)
 
 ## Requisitos
 

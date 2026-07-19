@@ -31,7 +31,7 @@ apps/projects/
 ├── management/commands/
 │   └── sync_projects.py    # envoltorio CLI de catalog.sync (permite --prune)
 ├── views.py              # CBV finas: leen Project, llaman a un service, renderizan
-├── urls.py               # 5 rutas
+├── urls.py               # 6 rutas
 └── templates/projects/
     ├── project_list.html          # página completa (extiende base.html)
     └── partials/                    # fragmentos que devuelven las vistas HTMX
