@@ -141,8 +141,9 @@ repos de terceros, y el modal pinta HTML. "Es local" protege de la red, no de un
 Stack: Django 6 + HTMX (cada endpoint devuelve un partial, sin build de JavaScript),
 Tailwind v4 vía `django-tailwind-cli` (binario standalone, sin Node) y SQLite.
 
-Más detalle en [`docs/`](docs/) (arquitectura, flujos HTMX y modelo de datos) y en
-[`.claude/.rules/`](.claude/.rules/) (convenciones obligatorias del proyecto).
+Más detalle en [`docs/`](docs/): [arquitectura](docs/arquitectura.md),
+[flujos HTMX](docs/flujos-htmx.md) y [modelo de datos](docs/modelo-datos.md). Las convenciones
+del proyecto viven en [`.claude/.rules/`](.claude/.rules/).
 
 ## Tests
 
