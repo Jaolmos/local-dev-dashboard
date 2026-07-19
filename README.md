@@ -25,7 +25,7 @@ desplegar a producción. Está pensada y probada **para Linux**.
 
 El botón "Docs" de cada tarjeta abre el README sin salir del panel:
 
-![El README de un proyecto abierto en el modal, con sus capturas como miniaturas](screenshots/readme-modal.png)
+![El README de semantic-bookmarks abierto en el modal, con sus capturas como miniaturas](screenshots/readme-modal.png)
 
 ## Requisitos
 
