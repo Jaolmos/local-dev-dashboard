@@ -12,8 +12,9 @@ desplegar a producción. Está pensada y probada **para Linux**.
 - **Escanea** la carpeta donde guardas tus proyectos (recursivamente, hasta 3 niveles) y detecta
   cualquier directorio que sea un repositorio Git.
 - **Ordena por actividad**: lo más reciente arriba, los repos sin commits al final.
-- **Detecta el stack** por ficheros marcadores (`pyproject.toml`, `package.json`, `go.mod`…) y lo
-  muestra como etiquetas con color por tecnología.
+- **Detecta el stack** por ficheros marcadores (`pyproject.toml`, `package.json`, `go.mod`,
+  `tsconfig.json`…) y, para repos sin fichero de proyecto, por los ficheros que contiene
+  (`*.py`, `*.ipynb`, `*.csproj`). Se muestra como etiquetas con color por tecnología.
 - **Estado de Git en vivo**, cargado bajo demanda vía HTMX al aparecer cada tarjeta: rama, si hay
   cambios sin confirmar y cuántos commits llevas por delante/por detrás del remoto.
 - **README en un modal**, renderizado de Markdown a HTML sin salir del panel.
@@ -113,8 +114,9 @@ apps/projects/
 ├── services/            # lógica de negocio, sin saber nada de HTTP
 │   ├── discovery.py     # escaneo recursivo de PROJECTS_ROOT
 │   ├── git.py           # estado y último commit (subprocess, solo lectura)
-│   ├── stack.py         # detección de stack por ficheros marcadores
-│   └── readme.py        # Markdown → HTML
+│   ├── stack.py         # detección de stack (ficheros marcadores + patrones)
+│   ├── readme.py        # Markdown → HTML sanitizado (nh3)
+│   └── catalog.py       # vuelca lo escaneado en SQLite
 ├── views.py             # CBV finas: orquestan services y devuelven partials
 └── templates/projects/  # plantillas y partials HTMX
 ```
@@ -124,11 +126,15 @@ vivo de Git y el HTML del README se calculan al vuelo bajo demanda y **no** se g
 excepción deliberada es `last_commit`: se persiste porque el orden por actividad lo hace la base de
 datos, y no se puede ordenar por un dato que se calcula al renderizar.
 
+El README se sanitiza con `nh3` antes de mostrarlo: el panel escanea la carpeta donde clonas
+repos de terceros, y el modal pinta HTML. "Es local" protege de la red, no de un repo con
+`<script>` en su README.
+
 Stack: Django 6 + HTMX + partials nativos de Django (`{% partialdef %}`), Tailwind v4 vía
 `django-tailwind-cli` (binario standalone, sin Node) y SQLite.
 
-Más detalle en [`.claude/.rules/`](.claude/.rules/): arquitectura, convenciones de Python/Django,
-frontend, testing y git.
+Más detalle en [`docs/`](docs/) (arquitectura, flujos HTMX y modelo de datos) y en
+[`.claude/.rules/`](.claude/.rules/) (convenciones obligatorias del proyecto).
 
 ## Tests
 

@@ -28,3 +28,8 @@
 
 - Acciones que ejecutan comandos del SO (abrir VSCode) validan que la ruta pertenece a un
   `Project` existente y vive bajo `PROJECTS_ROOT`. Nunca ejecutar rutas libres del cliente.
+- **El contenido de los repos escaneados es de terceros**: lo que se lea del disco y se
+  pinte con `|safe` va sanitizado antes (el README pasa por `nh3.clean`). "Es local" protege
+  de atacantes de red, no de un repo clonado con HTML malicioso dentro.
+- Las peticiones htmx que escriben (`hx-post`) necesitan el token CSRF; lo aporta el
+  `hx-headers` del `<body>` en `base.html`, que se hereda a toda la página.

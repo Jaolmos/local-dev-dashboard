@@ -25,8 +25,8 @@ apps/projects/
 ├── services/             # lógica pura, sin saber nada de HTTP
 │   ├── discovery.py       # escanea PROJECTS_ROOT, encuentra repos
 │   ├── git.py              # ejecuta `git` y parsea la salida
-│   ├── stack.py             # detecta tecnologías por ficheros marcadores
-│   ├── readme.py             # Markdown -> HTML
+│   ├── stack.py             # detecta tecnologías (ficheros marcadores + patrones)
+│   ├── readme.py             # Markdown -> HTML sanitizado
 │   └── catalog.py             # vuelca lo descubierto en SQLite (update_or_create)
 ├── management/commands/
 │   └── sync_projects.py    # envoltorio CLI de catalog.sync (permite --prune)
@@ -72,14 +72,38 @@ recursivamente hasta 3 niveles de profundidad (`_MAX_DEPTH`), y en cada carpeta:
    que `~/Proyectos/reto_apps_2026/` (carpeta contenedora, sin `.git` propio) deje ver
    los repos que tiene dentro, como este mismo dashboard.
 
-Por cada repo encontrado se calculan a la vez `stack.detect()` (mira ficheros
-marcadores: `manage.py` → Django, `package.json` → Node.js, etc.) y
+Por cada repo encontrado se calculan a la vez `stack.detect()` y
 `git.get_last_commit()` (para poder ordenar por actividad más tarde). Ambos se guardan
 ya en el `DiscoveredProject`, listos para que `sync_projects` los escriba en el catálogo.
 
 `_MAX_DEPTH = 3` es una constante fija, no configurable desde `.env` — si algún día una
 estructura de carpetas más profunda queda fuera del escaneo, ese es el primer sitio
 donde tocar.
+
+## La detección de stack (`stack.py`) — dos mecanismos
+
+El primero es un diccionario de **ficheros marcadores** en la raíz del repo
+(`STACK_MARKERS`): `manage.py` → Django, `package.json` → Node.js, `tsconfig.json` →
+TypeScript, etc. Ampliarlo es añadir una línea.
+
+El segundo son **patrones de nombre de fichero** (`GLOB_MARKERS`: `*.py`, `*.ipynb`,
+`*.csproj`, `*.sln`), y existe porque muchos repos reales no tienen fichero de proyecto:
+una carpeta de katas o de ejercicios es solo `.py` sueltos, y con marcadores se quedaba
+sin etiqueta. Se buscan en la raíz y **hasta 2 niveles** (`_GLOB_DEPTH`), porque esos
+scripts suelen estar agrupados en subcarpetas temáticas.
+
+Dos decisiones que evitan que esto se dispare:
+
+- Se ignoran carpetas ocultas y las de dependencias (`_IGNORED_DIRS`: `node_modules`,
+  `venv`, `__pycache__`…). Sin eso, un `.venv` con miles de `.py` o el `node-gyp` de
+  `node_modules` darían falsos positivos, además de ser lento.
+- El árbol se recorre **una sola vez** para todos los patrones, saltando los que ya tienen
+  su etiqueta puesta por marcador y cortando en cuanto no queda ninguno pendiente. Un repo
+  con `pyproject.toml` ya es Python, así que no hace falta buscar ningún `*.py`.
+
+Efecto colateral asumido: un proyecto Django reporta ahora **Django y Python**, porque
+`manage.py` casa con `*.py`. Y `Makefile` se descartó como marcador por ambiguo (aparece
+en repos de cualquier lenguaje).
 
 ## La sincronización del catálogo
 
@@ -113,8 +137,26 @@ disponible por si hiciera falta mostrar "sincronizado hace X".
 
 ## Seguridad (aun siendo una app local)
 
+"Local" protege de atacantes de red, **no del contenido que tú mismo te traes al disco**.
+El dashboard escanea `~/Proyectos`, que es exactamente donde clonas repos de terceros, así
+que hay dos superficies que cuidar.
+
+### 1. El README es contenido no confiable
+
+`readme.render()` pasa el Markdown por `markdown.markdown()` y **después por
+`nh3.clean()`**, y el modal lo pinta con `{{ content|safe }}`. La sanitización no es
+decorativa: la librería `markdown` deja pasar el HTML crudo tal cual, así que sin ella un
+README con `<script>` o `<img onerror=...>` ejecutaría JS en tu navegador nada más abrir
+el modal — en el mismo origen donde vive la sesión del admin de Django.
+
+Se sanitiza **en el service**, no en la plantilla, porque es donde la arquitectura pone la
+lógica: el `|safe` del template es seguro precisamente porque el HTML ya llega limpio.
+Si algún día se pinta otro contenido leído del disco, debe pasar por el mismo filtro.
+
+### 2. Ejecutar procesos del SO
+
 La única acción que ejecuta algo del sistema operativo es "Abrir en VSCode"
-(`OpenVSCodeView._open`, `views.py:68-79`). Antes de lanzar el proceso comprueba que la
+(`OpenVSCodeView._open`). Antes de lanzar el proceso comprueba que la
 ruta resuelta vive **dentro de `PROJECTS_ROOT`**:
 
 ```python

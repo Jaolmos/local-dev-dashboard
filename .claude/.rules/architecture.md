@@ -8,8 +8,8 @@ apps/<app>/
 ├── services/            # lógica de negocio; NO importa vistas ni request/response.
 │   ├── discovery.py     # escaneo de PROJECTS_ROOT (pathlib) + 1ª línea del README
 │   ├── git.py           # estado git (subprocess, solo lectura) → dataclass GitStatus
-│   ├── stack.py         # detección de stack por ficheros marcadores → list[str]
-│   ├── readme.py        # markdown → HTML
+│   ├── stack.py         # stack por ficheros marcadores y patrones → list[str]
+│   ├── readme.py        # markdown → HTML sanitizado (nh3)
 │   └── catalog.py       # vuelca lo descubierto en SQLite → dataclass SyncResult
 ├── views.py             # CBV finas: orquestan services y devuelven templates/partials
 ├── urls.py              # rutas de la app (namespace app_name)

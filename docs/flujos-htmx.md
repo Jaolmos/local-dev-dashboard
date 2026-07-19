@@ -50,8 +50,12 @@ escribe. El resultado es un `GitStatus` (dataclass, no un modelo) que **no se gu
 ningún sitio**; si vuelves a la página se vuelve a pedir desde cero.
 
 El partial decide qué pintar según los campos:
+- `error=True` → "git no responde" en gris. Se comprueba **antes que nada**: pasa si `git`
+  excede el timeout de 5 s (un repo en un mount de red muerto) o revienta. Sin este caso
+  la excepción subiría hasta la vista y la tarjeta devolvería un 500.
 - `is_repo=False` → "sin git" en gris (pasaría si `.git` desapareciera entre el sync y
-  ahora, caso raro pero cubierto).
+  ahora, caso raro pero cubierto). Es distinto de `error`: aquí sabemos que no hay repo,
+  allí no sabemos nada.
 - `is_dirty` → badge ámbar "con cambios"; si no, badge verde "sin cambios"
   (`status_badge.html`, compartido con la leyenda para que el color signifique lo mismo
   en los dos sitios).
@@ -62,9 +66,12 @@ El partial decide qué pintar según los campos:
 
 ```
 GET /<pk>/readme/  →  ReadmeView.get()
-                   →  readme.render(project.location)   # lee README.md, markdown.markdown()
+                   →  readme.render(project.location)   # markdown.markdown() + nh3.clean()
                    →  partials/readme_modal.html
 ```
+
+El `nh3.clean()` no es opcional: el modal pinta el resultado con `|safe` y el README viene
+de un repo que puede no ser tuyo. Ver [arquitectura](arquitectura.md#seguridad-aun-siendo-una-app-local).
 
 Target especial: en vez de reemplazar algo dentro de la tarjeta, el botón "Docs" apunta
 a un contenedor vacío que vive fuera del grid, al final de `base.html`:

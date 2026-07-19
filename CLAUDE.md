@@ -14,7 +14,8 @@ producción**: prioriza simplicidad y DX sobre hardening.
 - **CSS:** Tailwind vía `django-tailwind-cli` (binario standalone, sin Node). htmx por CDN.
 - **BD:** SQLite (catálogo de proyectos).
 - **Git:** comandos nativos vía `subprocess` (sin GitPython). Requiere `git` en el sistema.
-- **Markdown:** librería `markdown` para renderizar README.
+- **Markdown:** librería `markdown` para renderizar README + `nh3` para sanitizar el HTML
+  resultante (los README vienen de repos de terceros).
 - **Config:** `django-environ` (`.env`: `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `PROJECTS_ROOT`).
 - **Tests:** `pytest` + `pytest-django`.
 
