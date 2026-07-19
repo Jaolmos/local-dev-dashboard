@@ -161,9 +161,28 @@
     color: var(--color-ink-100);
     background: var(--color-ink-800);
 }
+/* Imágenes del README: miniatura por defecto, ancho completo al clicar. */
 .readme-body img {
     max-width: 100%;
+    max-height: 14rem;
     height: auto;
+    width: auto;
+    border: 1px solid var(--color-ink-800);
+    border-radius: 0.5rem;
+    cursor: zoom-in;
+    transition: max-height 0.25s ease;
+}
+.readme-body img.is-expanded {
+    max-height: none;
+    width: 100%;
+    cursor: zoom-out;
+}
+/* Las imágenes rotas (ruta que ya no existe) no deben ocupar una caja enorme. */
+.readme-body img[alt]:after {
+    content: attr(alt);
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-ink-600);
 }
 .readme-body hr {
     border-color: var(--color-ink-800);

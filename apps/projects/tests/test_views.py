@@ -56,6 +56,37 @@ def test_git_status_returns_partial(client, project):
     assert b"sin git" in response.content
 
 
+def test_readme_asset_serves_project_image(client, project):
+    (project.location / "screenshots").mkdir()
+    image = project.location / "screenshots" / "demo.png"
+    image.write_bytes(b"\x89PNG\r\n\x1a\n fake")
+
+    response = client.get(
+        reverse("projects:readme-asset", args=[project.pk, "screenshots/demo.png"])
+    )
+
+    assert response.status_code == 200
+    assert b"".join(response.streaming_content) == image.read_bytes()
+
+
+def test_readme_asset_rejects_path_traversal(client, project, tmp_path):
+    # Un README con ../ no debe poder leer fuera de la carpeta del proyecto.
+    (tmp_path / "secreto.png").write_bytes(b"secreto")
+
+    response = client.get(reverse("projects:readme-asset", args=[project.pk, "../secreto.png"]))
+
+    assert response.status_code == 404
+
+
+def test_readme_asset_rejects_non_image_files(client, project):
+    # Aunque esté dentro del proyecto: solo imágenes, nunca un .env.
+    (project.location / ".env").write_text("SECRET=1")
+
+    response = client.get(reverse("projects:readme-asset", args=[project.pk, ".env"]))
+
+    assert response.status_code == 404
+
+
 def test_git_status_degrades_when_git_fails(client, project, monkeypatch):
     # git colgado -> partial con aviso, nunca un 500.
     from apps.projects.services.git import GitStatus

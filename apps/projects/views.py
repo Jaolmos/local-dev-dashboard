@@ -2,10 +2,12 @@
 
 import logging
 import subprocess
+from pathlib import Path
 
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import render
+from django.urls import reverse
 from django.views.generic import ListView
 from django.views.generic.base import View
 from django.views.generic.detail import SingleObjectMixin
@@ -56,12 +58,41 @@ class ReadmeView(SingleObjectMixin, View):
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
         project = self.get_object()
-        content = readme.render(project.location)
+        # Las imágenes del README se sirven desde ReadmeAssetView, no desde /static/.
+        # reverse() exige un <path> no vacío, así que se quita el relleno.
+        asset_base = reverse("projects:readme-asset", args=[project.pk, "x"]).removesuffix("x")
+        content = readme.render(project.location, asset_base=asset_base)
         return render(
             request,
             "projects/partials/readme_modal.html",
             {"project": project, "content": content},
         )
+
+
+class ReadmeAssetView(SingleObjectMixin, View):
+    """Sirve una imagen local del README (las rutas relativas no existen en /static/)."""
+
+    model = Project
+
+    def get(self, request, *args, **kwargs) -> FileResponse:
+        project = self.get_object()
+        asset = self._resolve(project.location, kwargs["path"])
+        if asset is None:
+            raise Http404("Imagen no disponible")
+        return FileResponse(asset.open("rb"))
+
+    @staticmethod
+    def _resolve(root: Path, relative: str) -> Path | None:
+        """Ruta absoluta del fichero, o None si no es una imagen dentro del proyecto."""
+        try:
+            asset = (root / relative).resolve()
+            asset.relative_to(root.resolve())  # corta los ../ que salgan del proyecto
+        except (ValueError, OSError):
+            return None
+        # Solo imágenes: que un README no pueda pedir el .env del proyecto.
+        if asset.suffix.lower() not in readme.IMAGE_SUFFIXES or not asset.is_file():
+            return None
+        return asset
 
 
 class OpenButtonView(SingleObjectMixin, View):

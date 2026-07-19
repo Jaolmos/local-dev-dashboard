@@ -17,7 +17,8 @@
 
         <div class="overflow-y-auto px-6 py-5">
             {% if content %}
-                <div class="readme-body">{{ content|safe }}</div>
+                {# Clic en una imagen: alterna miniatura / ancho completo. #}
+                <div class="readme-body" onclick="if (event.target.tagName === 'IMG') event.target.classList.toggle('is-expanded')">{{ content|safe }}</div>
             {% else %}
                 <p class="py-8 text-center text-sm text-ink-500">Este proyecto no tiene README.md.</p>
             {% endif %}
