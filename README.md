@@ -152,3 +152,7 @@ uv run pytest apps/projects/tests/test_git.py
 
 Las acciones que lanzan procesos del sistema (abrir VSCode) se prueban siempre con `subprocess`
 mockeado; los tests nunca abren ventanas reales.
+
+## Licencia
+
+[MIT](LICENSE) © Jose Antonio Olmos Martinez
