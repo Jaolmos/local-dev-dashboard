@@ -17,8 +17,9 @@ desplegar a producción. Está pensada y probada **para Linux**.
 - **Detecta el stack** por ficheros marcadores (`pyproject.toml`, `package.json`, `go.mod`,
   `tsconfig.json`…) y, para repos sin fichero de proyecto, por los ficheros que contiene
   (`*.py`, `*.ipynb`, `*.csproj`). Se muestra como etiquetas con color por tecnología.
-- **Estado de Git en vivo**, cargado bajo demanda vía HTMX al aparecer cada tarjeta: rama, si hay
-  cambios sin confirmar y cuántos commits llevas por delante/por detrás del remoto.
+- **Estado de Git sin cachear**: rama, cambios sin confirmar y commits por delante/por detrás del
+  remoto. Se calcula de cero en cada carga, y cada tarjeta lo pide vía HTMX al entrar en pantalla
+  (no se refresca sola: lo que ves se congela hasta que recargas).
 - **README en un modal**, renderizado de Markdown a HTML sin salir del panel, con las imágenes
   del propio repo como miniaturas ampliables al clic.
 - **Abrir en VSCode** con un clic.
@@ -137,8 +138,8 @@ El README se sanitiza con `nh3` antes de mostrarlo: el panel escanea la carpeta 
 repos de terceros, y el modal pinta HTML. "Es local" protege de la red, no de un repo con
 `<script>` en su README.
 
-Stack: Django 6 + HTMX + partials nativos de Django (`{% partialdef %}`), Tailwind v4 vía
-`django-tailwind-cli` (binario standalone, sin Node) y SQLite.
+Stack: Django 6 + HTMX (cada endpoint devuelve un partial, sin build de JavaScript),
+Tailwind v4 vía `django-tailwind-cli` (binario standalone, sin Node) y SQLite.
 
 Más detalle en [`docs/`](docs/) (arquitectura, flujos HTMX y modelo de datos) y en
 [`.claude/.rules/`](.claude/.rules/) (convenciones obligatorias del proyecto).

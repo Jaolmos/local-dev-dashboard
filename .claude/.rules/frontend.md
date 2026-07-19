@@ -14,9 +14,14 @@ Plantillas Django + HTMX + partials. Cero JavaScript propio salvo que sea impres
 
 ## Partials
 
-- Fragmentos reutilizables en `partials/`. Usar los partials nativos de Django 6
-  (`{% partialdef %}`, sin `{% load %}` ni librería aparte) cuando el fragmento vive junto a su
-  template; ficheros sueltos cuando se reutilizan.
+- **Todo partial que sirva un endpoint HTMX va en un fichero suelto** en `partials/`, y la vista
+  lo renderiza con `render(request, "app/partials/x.html", ...)`. No es una preferencia: Django 6
+  trae `{% partialdef %}`/`{% partial %}` en el core, pero **no** soporta renderizar
+  `plantilla.html#fragmento` desde una vista (da `TemplateDoesNotExist`), así que un `partialdef`
+  no se puede devolver por HTTP.
+- `{% partialdef %}` queda para fragmentos que solo se repiten **dentro de una misma plantilla**.
+  Hoy el proyecto no usa ninguno; todos sus partials los sirve una vista o los incluye otra
+  plantilla con `{% include %}`.
 - **Nombrado:** los partials NO llevan prefijo `_`; la carpeta `partials/` ya indica que lo son.
 
 ## Tailwind

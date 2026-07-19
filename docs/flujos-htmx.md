@@ -6,6 +6,28 @@ vista la atiende y qué partial devuelve.
 htmx se carga por CDN en `base.html` (`unpkg.com/htmx.org@2.0.4`) — no hay build de JS,
 todo es atributos `hx-*` sobre HTML normal.
 
+## Qué aporta htmx aquí (y qué no)
+
+Conviene ser honesto con esto, porque es fácil justificarlo por el motivo equivocado.
+**No aporta rendimiento a la escala actual**: calcular el estado de git de los 16 repos del
+catálogo cuesta unos **150 ms** (~9 ms por repo), así que renderizarlo todo en el servidor
+dejaría la página en ~250 ms en vez de ~100 ms. Imperceptible.
+
+Lo que sí aporta:
+
+- **La interfaz**: el modal del README sin navegar a otra página, y el feedback en el botón
+  de VSCode sin recargar. Sin htmx habría que escribir ese JavaScript a mano.
+- **Que escale**: `hx-trigger="revealed"` solo pide las tarjetas visibles. Con 16 repos da
+  igual; con 100, renderizar en servidor serían ~1 s y esto seguiría igual de rápido.
+
+Y lo que **no** aporta, pese a lo que sugiere el nombre "estado en vivo": nada se actualiza
+solo. La página no se refresca; lo que ves se congela hasta que recargas. htmx aquí difiere
+la carga, no la mantiene viva.
+
+Todos los partials son **ficheros sueltos**, y no por gusto: Django 6 trae `{% partialdef %}`
+en el core pero no sabe renderizar `plantilla.html#fragmento` desde una vista, así que un
+partial que se sirve por HTTP tiene que ser un fichero.
+
 ## 1. Carga de la página — sin HTMX, es Django puro
 
 ```
