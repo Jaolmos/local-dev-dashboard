@@ -5,7 +5,8 @@
     style="animation-delay: {{ forloop.counter0 }}0ms"
 >
     <div class="flex items-start justify-between gap-3">
-        <h2 class="min-w-0 flex-1 text-lg font-semibold tracking-tight break-words text-ink-100 transition-colors group-hover:text-white">
+        {# min-h para dos líneas: alinea tags y pie aunque el nombre ocupe solo una. #}
+        <h2 class="min-h-14 min-w-0 flex-1 text-lg font-semibold tracking-tight break-words text-ink-100 transition-colors group-hover:text-white">
             {{ project.name }}
         </h2>
         {# max-w evita que una rama larga se coma el ancho del título. #}
